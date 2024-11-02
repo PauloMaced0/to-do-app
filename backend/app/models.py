@@ -24,6 +24,6 @@ class Task(SQLModel, table=True):
     deadline: Optional[datetime] = None
     priority: str = Field(default=PriorityEnum.none)
     created_at: datetime = Field(default_factory=datetime.now)
-    owner_id: int = Field(foreign_key="users.id")
+    owner_id: int = Field(foreign_key="user.id")
 
-    owner: Optional[User] = Relationship(back_populates="tasks")
+    owner: User = Relationship(back_populates="tasks")
