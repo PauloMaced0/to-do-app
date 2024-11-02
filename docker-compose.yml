@@ -4,22 +4,21 @@ services:
   frontend:
     build:
       context: ./frontend
+    depends_on:
+      - backend
     ports:
       - "8080:80"
-    networks:
-      - my-network
 
   backend:
     build:
       context: ./backend
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/mydatabase"
     ports:
       - "8000:8000"
-    networks:
-      - my-network
 
   db:
     image: postgres:13
@@ -27,15 +26,10 @@ services:
       POSTGRES_DB: mydatabase
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 5
     ports:
       - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - my-network
-
-networks:
-  my-network:
-
-volumes:
-  postgres-data:
