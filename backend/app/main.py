@@ -52,7 +52,7 @@ def create_user_endpoint(user: UserCreate, db: SessionDep):
 
 @app.post("/tasks/", response_model=Task)
 def create_task_endpoint(task: TaskCreate, db: SessionDep):
-    return create_task(db, task, 1)
+    return create_task(db, task)
 
 @app.get("/tasks/", response_model=List[Task])
 def read_tasks(user_id: int, db: SessionDep):
