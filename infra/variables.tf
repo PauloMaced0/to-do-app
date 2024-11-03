@@ -62,4 +62,29 @@ variable "credential_profile" {
   description = "Profile name in your credentials file"
   type        = string
 }
+
+variable "pool_name" {
+  description = "Name of the cognito pool"
+  type        = string
+}
   
+variable "client_name" {
+  description = "Name of the cognito client"
+  type        = string
+}
+
+variable "domain" {
+  description = "Name of the cognito domain"
+  type        = string
+}
+
+variable "db_username" {
+  description = "Database username"
+  type        = string
+}
+
+variable "db_password" {
+  description = "Database password"
+  type        = string
+}
+
