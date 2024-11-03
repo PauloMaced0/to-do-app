@@ -42,6 +42,7 @@ locals {
 }
 
 #This resource authenticates you to the ECR service
+/*
 resource "null_resource" "docker_login" {
     provisioner "local-exec" {
         command                     = local.docker_login_command
@@ -51,7 +52,6 @@ resource "null_resource" "docker_login" {
     }
     depends_on                      = [ aws_ecr_repository.ecr ]
 }
-
 #This resource builds the docker image from the Dockerfile in the app folder
 resource "null_resource" "docker_build" {
     provisioner "local-exec" {
@@ -84,3 +84,4 @@ resource "null_resource" "docker_push" {
     }
     depends_on                      = [ null_resource.docker_tag ]
 }
+*/

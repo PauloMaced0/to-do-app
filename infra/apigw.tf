@@ -30,6 +30,8 @@ resource "aws_apigatewayv2_route" "apigw_route" {
   api_id    = aws_apigatewayv2_api.apigw.id
   route_key = "ANY /{proxy+}"
   target = "integrations/${aws_apigatewayv2_integration.apigw_integration.id}"
+  authorization_type = "JWT"
+  authorizer_id = aws_apigatewayv2_authorizer.auth.id
 }
 
 # Set a default stage
@@ -37,4 +39,17 @@ resource "aws_apigatewayv2_stage" "apigw_stage" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$default"
   auto_deploy = true
+}
+
+# Integrate with cognito
+resource "aws_apigatewayv2_authorizer" "auth" {
+  api_id           = aws_apigatewayv2_api.apigw.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+  name             = "cognito-authorizer"
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.client.id]
+    issuer   = "https://${aws_cognito_user_pool.pool.endpoint}"
+  }
 }
