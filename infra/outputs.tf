@@ -1,4 +1,4 @@
-output "dns_name" {
+output "api_endpoint" {
   description = "The DNS name of the load balancer"
-  value       = try(aws_alb.application_load_balancer.dns_name, null)
+  value       = try(aws_apigatewayv2_api.apigw.api_endpoint, null)
 }
