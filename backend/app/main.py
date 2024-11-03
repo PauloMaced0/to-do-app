@@ -1,14 +1,14 @@
 import os
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, status
 from sqlmodel import Session, create_engine, SQLModel
 from .models import User, Task
 from .crud import *
 from typing import Annotated, List
 from contextlib import asynccontextmanager
-from .schemas import TaskCreate, UserCreate, TaskUpdate
+from .schemas import HealthCheck, TaskCreate, UserCreate, TaskUpdate
 
-DATABASE_URL = str(os.getenv("DATABASE_URL"))
+DATABASE_URL = str(os.getenv("DATABASE_URL", "sqlite:///todo.db"))
 
 engine = create_engine(DATABASE_URL)
 
@@ -66,3 +66,8 @@ def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep):
 def delete_task_endpoint(task_id: int, db: SessionDep):
     delete_task(db, task_id)
     return {"message": "Task deleted successfully"}
+
+@app.get("/health", status_code=status.HTTP_200_OK, response_model=HealthCheck)
+def health():
+    return HealthCheck(status="OK")
+
