@@ -29,6 +29,20 @@ resource "aws_ecs_task_definition" "task_definition" {
                 startPeriod = 30,
                 retries = 5,
             }
+            environment = [
+            {
+               name = "DATABASE_URL",
+               value = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.todo_rds.endpoint}/todo_db"
+            }]
+            logConfiguration = {
+                logDriver = "awslogs"
+                options = {
+                    awslogs-group = "ecs-todo",
+                    awslogs-create-group = "true",
+                    awslogs-region = var.region,
+                    awslogs-stream-prefix = "ecs"
+                }
+            }
         }
     ])
     #Fargate is used as opposed to EC2, so we do not need to manage the EC2 instances. Fargate is serveless
