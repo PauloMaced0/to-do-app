@@ -48,14 +48,17 @@ variable "default_tags" {
 
 variable "container_port" {
   description = "Port that needs to be exposed for the application"
+  type        = number
 }
 
 variable "shared_config_files" {
   description = "Path of your shared config file in .aws folder"
+  type        = string
 }
   
 variable "shared_credentials_files" {
   description = "Path of your shared credentials file in .aws folder"
+  type        = string
 }
 
 variable "credential_profile" {
