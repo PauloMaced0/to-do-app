@@ -27,3 +27,4 @@ class Task(SQLModel, table=True):
     owner_id: int = Field(foreign_key="user.id")
 
     owner: User = Relationship(back_populates="tasks")
+

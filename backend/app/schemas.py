@@ -39,3 +39,7 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+class HealthCheck(BaseModel):
+    status: str = "OK"
+

@@ -1,5 +1,5 @@
 # Use the official Python image as the base image
-FROM python:3.9-slim
+FROM --platform=linux/amd64 python:3.9-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -7,7 +7,8 @@ WORKDIR /app
 # Copy the requirements.txt file and install dependencies
 COPY requirements.txt .
 # RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt && \
+    apk --no-cache add curl
 
 # Copy the FastAPI application code
 COPY . .
