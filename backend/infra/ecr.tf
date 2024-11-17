@@ -43,8 +43,8 @@ locals {
 }
 
 #This resource authenticates you to the ECR service
-/*
-resource "null_resource" "docker_login" {
+
+/* resource "null_resource" "docker_login" {
     provisioner "local-exec" {
         command                     = local.docker_login_command
     }
