@@ -11,6 +11,7 @@ shared_config_files         = "" # Replace with path
 shared_credentials_files    = "" # Replace with path
 credential_profile          = "" # Replace with what you named your profile
 pool_name                   = "todo-auth"
+identity_pool_name          = "todo-identity-pool"
 client_name                 = "todo-alb-cognito"
 domain                      = "todo-auth-domain"
 db_username                 = "todouser"     # TODO: Remove from var file
