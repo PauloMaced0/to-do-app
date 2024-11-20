@@ -1,18 +1,17 @@
 import os
-import base64
-import requests
-import jwt
-from jwt import PyJWKClient
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware 
-from fastapi import FastAPI, Depends, status, Request
+from fastapi import FastAPI, Depends, status, Query
 from sqlmodel import Session, create_engine, SQLModel
 from .models import User, Task
 from .crud import *
 from typing import Annotated, List
 from contextlib import asynccontextmanager
 from .schemas import HealthCheck, TaskCreate, UserCreate, TaskUpdate
-
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
+from jwt import PyJWKClient
+ 
 DATABASE_URL = str(os.getenv("DATABASE_URL", "sqlite:///todo.db"))
 
 engine = create_engine(DATABASE_URL)
@@ -25,7 +24,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
-origins = ["*"]
+origins = ["http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,12 +39,13 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # AWS Cognito configuration
-COGNITO_DOMAIN = 'https://todo-auth-domain.auth.eu-west-1.amazoncognito.com'
+REGION = 'eu-west-1'
+USER_POOL_ID = 'eu-west-1_xIATMdc2y'
 CLIENT_ID = '460soms42cqcn9lo4bp5mbtl6l'
+# COGNITO_DOMAIN = 'https://todo-auth-domain.auth.eu-west-1.amazoncognito.com'
 # CLIENT_SECRET = 'YOUR_APP_CLIENT_SECRET'
 # REDIRECT_URI = 'http://localhost:3000/auth/callback'
-USER_POOL_ID = 'eu-west-1_xIATMdc2y'
-COGNITO_KEYS_URL = f'https://cognito-idp.ew-west-1.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json'
+# COGNITO_KEYS_URL = f'https://cognito-idp.ew-west-1.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json'
 
 # Dependency to get DB session
 def get_session():
@@ -54,14 +54,22 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-@app.post("/users/dummy", response_model=User)
-def create_dummy_user_endpoint(db: SessionDep):
-    dummy_user_data = UserCreate(
-        username="dummy_user",
-        password="dummy_password"
-    )
-    user = create_user(db, dummy_user_data)
-    return user
+oauth2_scheme = HTTPBearer()
+
+@app.get("/tasks/filter-sort", response_model=List[Task])
+def filter_sort_tasks(
+    db: SessionDep,
+    user_id: int,
+    sort_by: str = Query("Creation Date", enum=["Creation Date", "Deadline", "Completion Status", "Priority"]),
+    filter_by: str = Query("All", enum=["All", "Completed", "Incomplete"]),
+):
+    """
+    Endpoint to filter and sort tasks for a given user.
+    """
+    # Retrieve user tasks
+    tasks = get_user_tasks(db, user_id)
+    
+    return filter_and_sort_tasks(tasks, filter_by, sort_by)
 
 @app.post("/users/", response_model=UserCreate)
 def create_user_endpoint(user: UserCreate, db: SessionDep):
@@ -88,92 +96,25 @@ def delete_task_endpoint(task_id: int, db: SessionDep):
 def health():
     return HealthCheck(status="OK")
 
-@app.post("/auth/callback")
-async def auth_callback(request: Request):
-    data = await request.json()
-    code = data.get('code')
-
-    # Exchange authorization code for tokens
-    token_url = f'https://{COGNITO_DOMAIN}/oauth2/token'
-
-    payload = {
-        'grant_type': 'authorization_code',
-        'client_id': CLIENT_ID,
-        'code': code,
-        # 'redirect_uri': REDIRECT_URI,
-    }
-
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    }
-
-    # if CLIENT_SECRET:
-    #     auth_str = f'{CLIENT_ID}:{CLIENT_SECRET}'
-    auth_str = f'{CLIENT_ID}'
-    b64_auth_str = base64.b64encode(auth_str.encode()).decode()
-    headers['Authorization'] = f'Basic {b64_auth_str}'
-
-    response = requests.post(token_url, data=payload, headers=headers)
-    if response.status_code != 200:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Failed to get tokens')
-
-    tokens = response.json()
-    id_token = tokens.get('id_token')
-
-    # Verify and decode the ID token
-    decoded_token = verify_token(id_token)
-
-    # Store user info in session
-    request.session['user'] = {
-        'username': decoded_token.get('cognito:username'),
-        'email': decoded_token.get('email'),
-        'sub': decoded_token.get('sub'),
-    }
-
-    return {'message': 'Authentication successful'}
-
-def verify_token(token):
-    # Fetch Cognito's public keys
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)):
+    token = credentials.credentials
+    jwks_url = f"https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json"
+    
     try:
-        # Initialize PyJWKClient
-        jwk_client = PyJWKClient(COGNITO_KEYS_URL)
-
-        # Fetch the signing key for the token
-        signing_key = jwk_client.get_signing_key_from_jwt(token)
-
-        # Decode and verify the token
-        decoded = jwt.decode(
+        # Fetch public keys from AWS Cognito
+        jwks_client = PyJWKClient(jwks_url)
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        
+        # Decode and validate the token
+        payload = jwt.decode(
             token,
             signing_key.key,
             algorithms=["RS256"],
-            audience=CLIENT_ID,
-            issuer=f"https://cognito-idp.us-east-1.amazonaws.com/{USER_POOL_ID}",
+            audience=CLIENT_ID,  # Replace with your Cognito app client ID
         )
-        return decoded
-    except Exception as e:
-        print(f"Token verification failed: {e}")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.PyJWKError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
-@app.get("/auth/status")
-async def auth_status(request: Request):
-    user = request.session.get('user')
-    if user:
-        return {'authenticated': True, 'user': user}
-    else:
-        return {'authenticated': False}
-
-def get_current_user(request: Request):
-    user = request.session.get('user')
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    return user
-
-@app.get("/protected-endpoint")
-async def protected_endpoint(user: dict = Depends(get_current_user)):
-    return {'message': f'Hello, {user["username"]}'}
-
-@app.get("/logout")
-async def logout(request: Request):
-    request.session.clear()
-    # Optionally redirect to Cognito logout URL
-    return {'message': 'Logged out'}

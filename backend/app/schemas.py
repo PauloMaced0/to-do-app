@@ -32,7 +32,7 @@ class UserBase(BaseModel):
     username: str
 
 class UserCreate(UserBase):
-    password: str
+    sub: str
 
 class User(UserBase):
     id: int
