@@ -120,6 +120,7 @@ function Reminders() {
                     <option>Creation Date</option>
                     <option>Deadline</option>
                     <option>Completion Status</option>
+                    <option>Priority</option>
                   </select>
                 </div>
                 <div>
