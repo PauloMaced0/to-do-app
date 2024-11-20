@@ -4,7 +4,7 @@ yarn.lock
 dist/
 
 # dependencies
-/node_modules
+frontend/todo_ui/node_modules
 /.pnp
 .pnp.js
 
@@ -13,6 +13,9 @@ dist/
 
 # production
 /build
+
+# sql dev database 
+*.db
 
 # misc
 .DS_Store

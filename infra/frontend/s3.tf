@@ -56,35 +56,6 @@ resource "aws_s3_bucket_policy" "static_site_bucket_policy" {
   policy = data.aws_iam_policy_document.s3_bucket_policy.json
 }
 
-# resource "aws_s3_bucket_policy" "bucket-policy" {
-#   bucket = aws_s3_bucket.todoui.id
-#   policy = data.aws_iam_policy_document.iam-policy-1.json
-# }
-
-# data "aws_iam_policy_document" "iam-policy-1" {
-#   statement {
-#     sid    = "AllowPublicRead"
-#     effect = "Allow"
-#     resources = [
-#       aws_s3_bucket.todoui.arn,
-#       "${aws_s3_bucket.todoui.arn}/*",
-#     ]
-#     actions = ["S3:GetObject"]
-#     principals {
-#       type        = "*"
-#       identifiers = ["*"]
-#     }
-#   }
-# }
-
-# resource "aws_s3_bucket_website_configuration" "todoui_config" {
-#   bucket = aws_s3_bucket.todoui.id
-#
-#   index_document {
-#     suffix = "index.html"
-#   }
-# }
-
 locals {
   send_to_s3 = "aws s3 cp ../src s3://${aws_s3_bucket.todoui.id}/ --recursive"
 }

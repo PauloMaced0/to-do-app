@@ -6,12 +6,12 @@ const awsConfig = {
       region: 'eu-west-1',
 
       // Amazon Cognito User Pool ID
-      userPoolId: 'eu-west-1_p24nkrTHJ',
+      userPoolId: 'eu-west-1_7GnxkjJTp',
 
       // Amazon Cognito Web Client ID (26-char alphanumeric string)
-      userPoolClientId: '7a1cvnev9bed4orv2500ibrae4',
+      userPoolClientId: '2rboagge3tq8c6r3igp01ehtgd',
 
-      identityPoolId: 'eu-west-1:735a5596-eb68-499f-b270-70f5f36b8cd5',
+      // identityPoolId: 'eu-west-1:c3fbe446-0655-4812-a342-8645518594c4',
 
       // Enforce user authentication prior to accessing AWS resources or not
       mandatorySignIn: false,
@@ -24,7 +24,6 @@ const awsConfig = {
           redirectSignOut: ['http://localhost:3000/'],
           responseType: 'code', // or 'token', 'code' for Authorization code grant
         },
-        username: 'true',
         email: 'true', // Optional
       }
     }

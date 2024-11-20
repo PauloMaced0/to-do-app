@@ -1,8 +1,20 @@
 resource "aws_cognito_user_pool" "pool" {
-  name = var.pool_name
+  name = var.user_pool_name
 
   username_attributes = ["email"]
   auto_verified_attributes = ["email"]
+
+
+  schema {
+    name                = "email"
+    attribute_data_type = "String"
+    required            = true
+
+    string_attribute_constraints {
+      min_length = 5
+      max_length = 256
+    }
+  }
 
   account_recovery_setting {
     recovery_mechanism {
@@ -17,34 +29,17 @@ resource "aws_cognito_user_pool_client" "client" {
   user_pool_id = aws_cognito_user_pool.pool.id
   allowed_oauth_flows_user_pool_client = true
 
-  callback_urls = [
-    "http://localhost:3000/reminders",
-  ]
+  callback_urls = var.callback_urls
 
-  logout_urls = [
-    "http://localhost:3000/" 
-  ]
+  logout_urls = var.logout_urls
 
-  allowed_oauth_scopes = [
-    "email",
-    "openid",
-    "profile",
-    "aws.cognito.signin.user.admin"
-  ]
+  allowed_oauth_scopes = var.allowed_oauth_scopes
 
-  allowed_oauth_flows = [
-    "code",
-    "implicit"
-  ]
+  allowed_oauth_flows = var.allowed_oauth_flows
 
-  explicit_auth_flows = [
-    "ALLOW_CUSTOM_AUTH",
-    "ALLOW_REFRESH_TOKEN_AUTH",
-    "ALLOW_USER_PASSWORD_AUTH",
-    "ALLOW_USER_SRP_AUTH"
-  ]
+  explicit_auth_flows = var.explicit_auth_flows
 
-  supported_identity_providers = ["COGNITO"]
+  supported_identity_providers = var.supported_identity_providers 
 
   token_validity_units {
     access_token  = "hours"
@@ -52,9 +47,9 @@ resource "aws_cognito_user_pool_client" "client" {
     refresh_token = "hours"
   }
 
-  refresh_token_validity = 4
-  access_token_validity  = 1
-  id_token_validity      = 1
+  refresh_token_validity = var.refresh_token_validity
+  access_token_validity  = var.access_token_validity
+  id_token_validity      = var.id_token_validity
 }
 
 resource "aws_cognito_user_pool_domain" "domain" {
@@ -64,11 +59,11 @@ resource "aws_cognito_user_pool_domain" "domain" {
 
 resource "aws_cognito_identity_pool" "identity_pool" {
   identity_pool_name               = var.identity_pool_name
-  allow_unauthenticated_identities = false
+  allow_unauthenticated_identities = var.allow_unauthenticated_identities 
 
   cognito_identity_providers {
     client_id       = aws_cognito_user_pool_client.client.id 
     provider_name   = "cognito-idp.${var.region}.amazonaws.com/${aws_cognito_user_pool.pool.id}"
-    server_side_token_check = true
+    server_side_token_check = var.server_side_token_check
   }
 }

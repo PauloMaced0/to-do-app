@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List
-from datetime import datetime
+from datetime import date
 from enum import Enum
 
 class PriorityEnum(str, Enum):
@@ -10,9 +10,8 @@ class PriorityEnum(str, Enum):
     high = "high"
 
 class User(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    sub: str = Field(default=None, primary_key=True, index=True)
     username: str = Field(index=True, unique=True, nullable=False)
-    hashed_password: str = Field(nullable=False)
 
     tasks: List["Task"] = Relationship(back_populates="owner")
 
@@ -21,10 +20,10 @@ class Task(SQLModel, table=True):
     title: str = Field(index=True)
     description: Optional[str] = None
     completed: bool = Field(default=False)
-    deadline: Optional[datetime] = None
+    deadline: Optional[date] = None
     priority: str = Field(default=PriorityEnum.none)
-    created_at: datetime = Field(default_factory=datetime.now)
-    owner_id: int = Field(foreign_key="user.id")
+    created_at: date = Field(default_factory=date.today)
+    owner_id: int = Field(foreign_key="user.sub")
 
     owner: User = Relationship(back_populates="tasks")
 

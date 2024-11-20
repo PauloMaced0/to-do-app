@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import { Hub } from "aws-amplify/utils";
 import { signInWithRedirect, getCurrentUser} from "aws-amplify/auth";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +34,22 @@ function Home() {
   const getUser = async () => {
     try {
       const currentUser = await getCurrentUser();
+      const session = await fetchAuthSession();
+
       setUser(currentUser);
+      
+      const userPayload = {
+        username: session.tokens.idToken.payload["email"],
+        sub: currentUser.userId,
+      };
+
+      // Send user data with Authorization header
+      await axios.post("http://localhost:8000/users", userPayload, {
+        headers: {
+          Authorization: `Bearer ${session.tokens.idToken}`,
+        },
+      });
+
     } catch (error) {
       console.error(error);
       console.log("Not signed in");
