@@ -1,34 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { Hub } from "aws-amplify/utils";
+// import { Hub } from "aws-amplify/utils";
 import { signInWithRedirect, getCurrentUser} from "aws-amplify/auth";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
-  const [customState, setCustomState] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = Hub.listen("auth", ({ payload }) => {
-      switch (payload.event) {
-        case "signInWithRedirect":
-          getUser();
-          break;
-        case "signInWithRedirect_failure":
-          setError("An error has occurred during the OAuth flow.");
-          break;
-        case "customOAuthState":
-          setCustomState(payload.data); // this is the customState provided on signInWithRedirect function
-          break;
-      }
-    });
-
     getUser();
-
-    return unsubscribe;
   }, []);
 
   const getUser = async () => {
@@ -46,6 +28,7 @@ function Home() {
       // Send user data with Authorization header
       await axios.post("http://localhost:8000/users", userPayload, {
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${session.tokens.idToken}`,
         },
       });
@@ -68,7 +51,6 @@ function Home() {
       signInWithRedirect({}); // Trigger Hosted UI login
     } catch (err) {
       console.error("Error during sign-in", err);
-      setError(err.message);
     }
   };
 

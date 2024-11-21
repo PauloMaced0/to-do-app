@@ -4,12 +4,19 @@ from .models import Task, User
 from .schemas import UserCreate, TaskCreate, TaskUpdate
 from fastapi import HTTPException
 
+priority_order = {
+    "none": 0,
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+}
+
 def filter_and_sort_tasks(tasks, filter_by, sort_by):
     # Filter tasks
     if filter_by == "Completed":
-        tasks = [task for task in tasks if task.is_completed]
+        tasks = [task for task in tasks if task.completed]
     elif filter_by == "Incomplete":
-        tasks = [task for task in tasks if not task.is_completed]
+        tasks = [task for task in tasks if not task.completed]
     
     # Sort tasks
     if sort_by == "Creation Date":
@@ -19,7 +26,7 @@ def filter_and_sort_tasks(tasks, filter_by, sort_by):
     elif sort_by == "Completion Status":
         tasks.sort(key=lambda x: x.completed)
     elif sort_by == "Priority":
-        tasks.sort(key=lambda x: x.priority, reverse=True)  # Assuming higher priority is indicated by a larger number
+        tasks.sort(key=lambda x: priority_order.get(x.priority, 0), reverse=True)  # Assuming higher priority is indicated by a larger number
 
     return tasks
 
@@ -50,7 +57,7 @@ def create_task(db: Session, task: TaskCreate):
     db.refresh(db_task)
     return db_task
 
-def get_user_tasks(db: Session, user_id: int):
+def get_user_tasks(db: Session, user_id: str):
     statement = select(Task).where(Task.owner_id == user_id)
     result = db.exec(statement)
     return result.all()
