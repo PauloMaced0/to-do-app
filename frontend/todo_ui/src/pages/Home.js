@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { fetchAuthSession } from 'aws-amplify/auth';
-// import { Hub } from "aws-amplify/utils";
 import { signInWithRedirect, getCurrentUser} from "aws-amplify/auth";
 import { useNavigate } from "react-router-dom";
 
