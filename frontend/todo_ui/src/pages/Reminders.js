@@ -8,7 +8,6 @@ import FilterSortOptions from '../components/FilterSortOptions';
 import TaskList from '../components/TaskList';
 
 function Reminders() {
-
   const [sortBy, setSortBy] = useState("Creation Date");
   const [filterBy, setFilterBy] = useState("All");
 

@@ -26,7 +26,7 @@ class Task(TaskBase):
     created_at: date
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserBase(BaseModel):
     username: str
@@ -38,7 +38,7 @@ class User(UserBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class HealthCheck(BaseModel):
     status: str = "OK"
