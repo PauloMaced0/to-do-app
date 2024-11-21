@@ -56,10 +56,10 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 oauth2_scheme = HTTPBearer()
 
-@app.get("/tasks/filter-sort", response_model=List[Task])
+@app.get("/tasks", response_model=List[Task])
 def filter_sort_tasks(
     db: SessionDep,
-    user_id: int,
+    user_id: str,
     sort_by: str = Query("Creation Date", enum=["Creation Date", "Deadline", "Completion Status", "Priority"]),
     filter_by: str = Query("All", enum=["All", "Completed", "Incomplete"]),
 ):
@@ -71,17 +71,13 @@ def filter_sort_tasks(
     
     return filter_and_sort_tasks(tasks, filter_by, sort_by)
 
-@app.post("/users/", response_model=UserCreate)
+@app.post("/users", response_model=UserCreate)
 def create_user_endpoint(user: UserCreate, db: SessionDep):
     return create_user(db, user)
 
-@app.post("/tasks/", response_model=Task)
+@app.post("/tasks", response_model=Task)
 def create_task_endpoint(task: TaskCreate, db: SessionDep):
     return create_task(db, task)
-
-@app.get("/tasks/", response_model=List[Task])
-def read_tasks(user_id: int, db: SessionDep):
-    return get_user_tasks(db, user_id)
 
 @app.put("/tasks/{task_id}", response_model=Task)
 def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep):

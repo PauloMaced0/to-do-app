@@ -1,29 +1,29 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import date
 from .models import PriorityEnum
 
 class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
     completed: Optional[bool] = False
-    deadline: Optional[datetime] = None
+    deadline: Optional[date] = None
     priority: Optional[PriorityEnum] = PriorityEnum.none
 
 class TaskCreate(TaskBase):
-    owner_id: int  # Include owner_id if needed
+    owner_id: str
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
-    deadline: Optional[datetime] = None
+    deadline: Optional[date] = None
     priority: Optional[PriorityEnum] = None
 
 class Task(TaskBase):
     id: int
     owner_id: int
-    created_at: datetime
+    created_at: date
 
     class Config:
         orm_mode = True

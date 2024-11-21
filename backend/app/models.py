@@ -23,7 +23,8 @@ class Task(SQLModel, table=True):
     deadline: Optional[date] = None
     priority: str = Field(default=PriorityEnum.none)
     created_at: date = Field(default_factory=date.today)
-    owner_id: int = Field(foreign_key="user.sub")
+    completed_at: date = Field(default_factory=date.today)
+    owner_id: str = Field(foreign_key="user.sub")
 
     owner: User = Relationship(back_populates="tasks")
 
