@@ -90,7 +90,7 @@ def filter_sort_tasks(
     if not token_user_id:
         raise HTTPException(status_code=401, detail="Invalid token: 'sub' claim is missing or invalid")
 
-    if token_user_id == user_id:
+    if token_user_id != user_id:
         raise HTTPException(status_code=401, detail="User ID mismatch")
     
     tasks = get_user_tasks(db, token_user_id)
@@ -113,7 +113,7 @@ def create_task_endpoint(task: TaskCreate, db: SessionDep, token: dict = Depends
     if not token_user_id:
         raise HTTPException(status_code=401, detail="Invalid token: 'sub' claim is missing or invalid")
 
-    if token_user_id == task.owner_id:
+    if token_user_id != task.owner_id:
         raise HTTPException(status_code=401, detail="User ID mismatch")
 
     return create_task(db, task)

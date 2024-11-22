@@ -68,7 +68,7 @@ def update_task(db: Session, task_id: int, task: TaskUpdate):
     db_task = result.first()
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
-    for key, value in task.model_dump(exclude_unset=True).items():
+    for key, value in task.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(db_task, key, value)
     db.commit()
     db.refresh(db_task)

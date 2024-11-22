@@ -93,6 +93,64 @@ function Reminders() {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
   };
 
+  const handleComplete = async (id) => {
+    try {
+      const session = await fetchAuthSession();
+
+      const taskPayload = {
+        title: null,
+        description: null,
+        completed: true,
+        deadline: null,
+        priority: null 
+      };
+
+      const response = await axios.put(`http://localhost:8000/tasks/${id}`, taskPayload, {
+        headers: {
+          Authorization: `Bearer ${session.tokens.idToken}`,
+        },
+      });
+
+      const completedTask = await response.data;
+      console.log("Task Completed:", completedTask);
+
+    } catch (error) {
+      console.error("Failed to complete task:", error.message);
+    }
+    setTasks((prevTasks) => prevTasks.map((task) => task.id === id ? { ...task, completed: true} : task));
+  };
+
+  const handleEdit = async (id) => {
+    try {
+      const session = await fetchAuthSession();
+
+      const taskPayload = {
+        title: null,
+        description: null,
+        completed: null,
+        deadline: null,
+        priority: null 
+      };
+
+      const response = await axios.put(`http://localhost:8000/tasks/${id}`, taskPayload, {
+        headers: {
+          Authorization: `Bearer ${session.tokens.idToken}`,
+        },
+      });
+
+      const completedTask = await response.data;
+      console.log("Task Edited:", completedTask);
+
+    } catch (error) {
+      console.error("Failed to edit task:", error.message);
+    }
+    setTasks((prevTasks) => 
+      prevTasks.map((task) => 
+        task.id === id ? { ...task, title: null, description: null, deadline: null, priority: null} 
+          : task
+      ));
+  };
+
   useEffect(() => {
     fetchTasks();
   }, [sortBy, filterBy]);
@@ -132,7 +190,14 @@ function Reminders() {
                 onFilterChange={(e) => setFilterBy(e.target.value)}
               />
               <hr className="border-t border-gray-300 my-4" />
-              <TaskList tasks={tasks} loading={loading} error={error} onDelete={handleDelete} />
+              <TaskList 
+                tasks={tasks} 
+                loading={loading} 
+                error={error} 
+                onDelete={handleDelete} 
+                onComplete={handleComplete}
+                onEdit={handleEdit}
+              />
             </div>
           </div>
         </div>
