@@ -1,7 +1,7 @@
 // src/components/TaskList.js
 import React from 'react';
 
-function TaskList({ tasks, loading, error, onDelete }) {
+function TaskList({ tasks, loading, error, onDelete, onComplete }) {
   if (loading) {
     return <div className="text-center py-4"><span className="text-gray-500">Loading...</span></div>;
   }
@@ -52,6 +52,7 @@ function TaskList({ tasks, loading, error, onDelete }) {
               <button
                 type="button"
                 className="rounded bg-green-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-green-500"
+                onClick={() => onComplete(task.id)}
               >
                 Complete
               </button>
