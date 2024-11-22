@@ -80,13 +80,20 @@ def filter_sort_tasks(
     user_id: str,
     sort_by: str = Query("Creation Date", enum=["Creation Date", "Deadline", "Completion Status", "Priority"]),
     filter_by: str = Query("All", enum=["All", "Completed", "Incomplete"]),
-    _: dict = Depends(verify_token)
+    token: dict = Depends(verify_token)
 ):
     """
     Endpoint to filter and sort tasks for a given user.
     """
     # Retrieve user tasks
-    tasks = get_user_tasks(db, user_id)
+    token_user_id = token.get("sub")
+    if not token_user_id:
+        raise HTTPException(status_code=401, detail="Invalid token: 'sub' claim is missing or invalid")
+
+    if token_user_id == user_id:
+        raise HTTPException(status_code=401, detail="User ID mismatch")
+    
+    tasks = get_user_tasks(db, token_user_id)
     
     return filter_and_sort_tasks(tasks, filter_by, sort_by)
 
@@ -98,24 +105,41 @@ def create_user_endpoint(user: UserCreate, db: SessionDep, _: dict = Depends(ver
     return create_user(db, user)
 
 @app.post("/tasks", response_model=Task)
-def create_task_endpoint(task: TaskCreate, db: SessionDep, _: dict = Depends(verify_token)):
+def create_task_endpoint(task: TaskCreate, db: SessionDep, token: dict = Depends(verify_token)):
     """
     Endpoint to create a new task given a specific user.
     """
+    token_user_id = token.get("sub")
+    if not token_user_id:
+        raise HTTPException(status_code=401, detail="Invalid token: 'sub' claim is missing or invalid")
+
+    if token_user_id == task.owner_id:
+        raise HTTPException(status_code=401, detail="User ID mismatch")
+
     return create_task(db, task)
 
 @app.put("/tasks/{task_id}", response_model=Task)
-def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep, _: dict = Depends(verify_token)):
+def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep, token: dict = Depends(verify_token)):
     """
     Endpoint to change the task specification.
     """
+    existing_task = get_task_by_id(db, task_id)
+
+    if existing_task.owner_id != token.get("sub"):
+        raise HTTPException(status_code=403, detail="Not authorized to update this task")
+
     return update_task(db, task_id, task)
 
 @app.delete("/tasks/{task_id}", response_model=dict)
-def delete_task_endpoint(task_id: int, db: SessionDep, _: dict = Depends(verify_token)):
+def delete_task_endpoint(task_id: int, db: SessionDep, token: dict = Depends(verify_token)):
     """
     Endpoint to delete a task from a specific user.
     """
+    existing_task = get_task_by_id(db, task_id)
+
+    if existing_task.owner_id != token.get("sub"):
+        raise HTTPException(status_code=403, detail="Not authorized to update this task")
+
     delete_task(db, task_id)
     return {"message": "Task deleted successfully"}
 

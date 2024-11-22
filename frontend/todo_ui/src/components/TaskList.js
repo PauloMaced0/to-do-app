@@ -1,7 +1,7 @@
 // src/components/TaskList.js
 import React from 'react';
 
-function TaskList({ tasks, loading, error }) {
+function TaskList({ tasks, loading, error, onDelete }) {
   if (loading) {
     return <div className="text-center py-4"><span className="text-gray-500">Loading...</span></div>;
   }
@@ -59,7 +59,11 @@ function TaskList({ tasks, loading, error }) {
             <button type="button" className="rounded bg-yellow-600 px-2 py-1 text-xs font-semibold text-white">
               Edit
             </button>
-            <button type="button" className="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white">
+            <button 
+              type="button" 
+              className="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white"
+              onClick={() => onDelete(task.id)}
+            >
               Delete
             </button>
           </div>
