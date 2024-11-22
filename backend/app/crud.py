@@ -82,3 +82,11 @@ def delete_task(db: Session, task_id: int):
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(db_task)
     db.commit()
+
+def get_task_by_id(db: Session, task_id: int) -> Task:
+    statement = select(Task).where(Task.id == task_id)
+    result = db.exec(statement)
+    db_task = result.first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return db_task

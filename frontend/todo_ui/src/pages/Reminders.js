@@ -39,10 +39,6 @@ function Reminders() {
     }
   };
 
-  useEffect(() => {
-    fetchTasks();
-  }, [sortBy, filterBy]);
-
   const handleTaskSubmission = async (event) => {
     event.preventDefault();
 
@@ -77,6 +73,29 @@ function Reminders() {
       console.error("Failed to create task:", error.message);
     }
   };
+
+  const handleDelete = async (id) => {
+    try {
+      const session = await fetchAuthSession();
+
+      const response = await axios.delete(`http://localhost:8000/tasks/${id}`, {
+        headers: {
+          Authorization: `Bearer ${session.tokens.idToken}`,
+        },
+      });
+
+      const deletedTask = await response.data;
+      console.log("Task Deleted Successfully:", deletedTask);
+
+    } catch (error) {
+      console.error("Failed to delete task:", error.message);
+    }
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, [sortBy, filterBy]);
 
   return (
     <div className="min-h-full">
@@ -113,7 +132,7 @@ function Reminders() {
                 onFilterChange={(e) => setFilterBy(e.target.value)}
               />
               <hr className="border-t border-gray-300 my-4" />
-              <TaskList tasks={tasks} loading={loading} error={error} />
+              <TaskList tasks={tasks} loading={loading} error={error} onDelete={handleDelete} />
             </div>
           </div>
         </div>
