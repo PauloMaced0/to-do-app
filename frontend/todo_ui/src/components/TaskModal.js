@@ -1,7 +1,7 @@
 // src/components/TaskModal.js
 import React from 'react';
 
-function TaskModal({ isOpen, onClose, onSubmit }) {
+function TaskModal({ isOpen, onClose, onSubmit, task }) {
   if (!isOpen) return null;
 
   return (
@@ -13,7 +13,9 @@ function TaskModal({ isOpen, onClose, onSubmit }) {
     >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Add New Task</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            { task ? "Edit Task" : "Add New Task" }
+          </h2>
         </div>
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div>
@@ -25,6 +27,7 @@ function TaskModal({ isOpen, onClose, onSubmit }) {
                 type="text"
                 name="title"
                 id="title"
+                defaultValue={task?.title || ""}
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-300 
                 placeholder:text-gray-400 focus:ring-2 focus:ring-inset 
@@ -42,6 +45,7 @@ function TaskModal({ isOpen, onClose, onSubmit }) {
               <textarea
                 id="description"
                 name="description"
+                defaultValue={task?.description || ""}
                 rows="3"
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-300 
@@ -60,6 +64,7 @@ function TaskModal({ isOpen, onClose, onSubmit }) {
               <input
                 type="date"
                 name="deadline"
+                defaultValue={task?.deadline || ""}
                 id="deadline"
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-300 
@@ -77,6 +82,7 @@ function TaskModal({ isOpen, onClose, onSubmit }) {
               <select
                 id="priority"
                 name="priority"
+                defaultValue={task?.priority || "none"}
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 
                 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 
                 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -102,7 +108,7 @@ function TaskModal({ isOpen, onClose, onSubmit }) {
               type="submit"
               className="rounded-md bg-blue-600 px-4 py-2 text-white font-semibold shadow-md hover:bg-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
             >
-              Add Task
+            {task ? "Save Changes" : "Add Task"}
             </button>
           </div>
         </form>
