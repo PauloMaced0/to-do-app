@@ -1,6 +1,6 @@
 // src/pages/Reminders.js
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import NavBar from '../components/NavBar';
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import TaskModal from '../components/TaskModal';
@@ -16,10 +16,15 @@ function Reminders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
+  const [currentTask, setCurrentTask] = useState(null);
 
-  const fetchTasks = async () => {
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentTask(null); // Reset current task when modal closes
+  };
+
+  const fetchTasks = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser();
       const session = await fetchAuthSession();
@@ -37,7 +42,7 @@ function Reminders() {
       setError("Failed to fetch tasks");
       setLoading(false); // Set loading to false even on error
     }
-  };
+  }, [sortBy, filterBy]);
 
   const handleTaskSubmission = async (event) => {
     event.preventDefault();
@@ -55,22 +60,40 @@ function Reminders() {
     console.log("Task Submitted:", task);
 
     try {
-      // Make an HTTP POST request to save the task
-      const response = await axios.post("http://localhost:8000/tasks", task, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
+      // If editing an existing task, send PUT request
+      if (currentTask) {
+        const response = await axios.put(`http://localhost:8000/tasks/${currentTask.id}`, task, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.tokens.idToken}`,
+          },
+        });
 
-      const createdTask = await response.data;
-      console.log("Task Created Successfully:", createdTask);
+        const updatedTask = await response.data;
+        console.log("Task Updated Successfully:", updatedTask);
 
-      // Close the modal on success
-      fetchTasks();
+        // Update the task list
+        setTasks((prevTasks) =>
+          prevTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+        );
+      } else {
+        // If creating a new task, send POST request
+        const response = await axios.post("http://localhost:8000/tasks", task, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.tokens.idToken}`,
+          },
+        });
+
+        const createdTask = await response.data;
+        console.log("Task Created Successfully:", createdTask);
+
+        // Add the new task to the list
+        setTasks((prevTasks) => [...prevTasks, createdTask]);
+      }
       handleCloseModal();
     } catch (error) {
-      console.error("Failed to create task:", error.message);
+      console.error("Failed to save task:", error.message);
     }
   };
 
@@ -120,40 +143,14 @@ function Reminders() {
     setTasks((prevTasks) => prevTasks.map((task) => task.id === id ? { ...task, completed: true} : task));
   };
 
-  const handleEdit = async (id) => {
-    try {
-      const session = await fetchAuthSession();
-
-      const taskPayload = {
-        title: null,
-        description: null,
-        completed: null,
-        deadline: null,
-        priority: null 
-      };
-
-      const response = await axios.put(`http://localhost:8000/tasks/${id}`, taskPayload, {
-        headers: {
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
-
-      const completedTask = await response.data;
-      console.log("Task Edited:", completedTask);
-
-    } catch (error) {
-      console.error("Failed to edit task:", error.message);
-    }
-    setTasks((prevTasks) => 
-      prevTasks.map((task) => 
-        task.id === id ? { ...task, title: null, description: null, deadline: null, priority: null} 
-          : task
-      ));
+  const handleEdit = async (task) => {
+    setCurrentTask(task);
+    handleOpenModal();
   };
 
   useEffect(() => {
     fetchTasks();
-  }, [sortBy, filterBy]);
+  }, [fetchTasks]);
 
   return (
     <div className="min-h-full">
@@ -162,8 +159,9 @@ function Reminders() {
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           <TaskModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={(e) => handleTaskSubmission(e, fetchTasks, () => setIsModalOpen(false))}
+            onClose={handleCloseModal}
+            onSubmit={(e) => handleTaskSubmission(e)}
+            task={currentTask}
           />
           <div className="px-4 py-3 sm:px-0">
             <div>
