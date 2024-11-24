@@ -1,11 +1,11 @@
 // src/pages/Reminders.js
-import axios from 'axios';
 import React, { useState, useEffect, useCallback } from 'react';
 import NavBar from '../components/NavBar';
-import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import TaskModal from '../components/TaskModal';
 import FilterSortOptions from '../components/FilterSortOptions';
 import TaskList from '../components/TaskList';
+import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
+import { completeUserTask, createUserTask, deleteUserTask, getUserTasks, updateUserTask } from '../services/api';
 
 function Reminders() {
   const [sortBy, setSortBy] = useState("Creation Date");
@@ -29,14 +29,9 @@ function Reminders() {
       const currentUser = await getCurrentUser();
       const session = await fetchAuthSession();
 
-      const response = await axios.get(`http://localhost:8000/tasks?user_id=${currentUser.userId}&sort_by=${sortBy}&filter_by=${filterBy}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
+      const response = await getUserTasks(currentUser.userId, filterBy, sortBy, session.tokens.idToken); 
 
-      setTasks(response.data); // Set tasks to the state
+      setTasks(response); // Set tasks to the state
       setLoading(false); // Set loading to false when data is loaded
     } catch (err) {
       setError("Failed to fetch tasks");
@@ -62,14 +57,7 @@ function Reminders() {
     try {
       // If editing an existing task, send PUT request
       if (currentTask) {
-        const response = await axios.put(`http://localhost:8000/tasks/${currentTask.id}`, task, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.tokens.idToken}`,
-          },
-        });
-
-        const updatedTask = await response.data;
+        const updatedTask = await updateUserTask(currentTask.id, task, session.tokens.idToken);
         console.log("Task Updated Successfully:", updatedTask);
 
         // Update the task list
@@ -78,14 +66,7 @@ function Reminders() {
         );
       } else {
         // If creating a new task, send POST request
-        const response = await axios.post("http://localhost:8000/tasks", task, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.tokens.idToken}`,
-          },
-        });
-
-        const createdTask = await response.data;
+        const createdTask = await createUserTask(task, session.tokens.idToken);
         console.log("Task Created Successfully:", createdTask);
 
         // Add the new task to the list
@@ -101,13 +82,7 @@ function Reminders() {
     try {
       const session = await fetchAuthSession();
 
-      const response = await axios.delete(`http://localhost:8000/tasks/${id}`, {
-        headers: {
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
-
-      const deletedTask = await response.data;
+      const deletedTask = await deleteUserTask(id, session.tokens.idToken);
       console.log("Task Deleted Successfully:", deletedTask);
 
     } catch (error) {
@@ -128,13 +103,7 @@ function Reminders() {
         priority: null 
       };
 
-      const response = await axios.put(`http://localhost:8000/tasks/${id}`, taskPayload, {
-        headers: {
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
-
-      const completedTask = await response.data;
+      const completedTask = await completeUserTask(id, taskPayload, session.tokens.idToken);
       console.log("Task Completed:", completedTask);
 
     } catch (error) {

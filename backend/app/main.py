@@ -145,7 +145,7 @@ def delete_task_endpoint(task_id: int, db: SessionDep, token: TokenDep):
     delete_task(db, task_id)
     return {"message": "Task deleted successfully"}
 
-@app.get("/tasks/stats/{user_sub}", response_model=TaskStats)
+@app.get("/tasks/stats/{user_id}", response_model=TaskStats)
 def get_task_statistics_endpoint(user_id: str, db: SessionDep, token: TokenDep):
     """
     Endpoint to get task stats.
