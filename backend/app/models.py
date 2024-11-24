@@ -12,6 +12,9 @@ class PriorityEnum(str, Enum):
 class User(SQLModel, table=True):
     sub: str = Field(default=None, primary_key=True, index=True)
     username: str = Field(index=True, unique=True, nullable=False)
+    full_name: Optional[str] = Field(default=None, max_length=256)
+    phone_number: Optional[str] = Field(default=None, max_length=20)
+    created_at: date = Field(default_factory=date.today)
 
     tasks: List["Task"] = Relationship(back_populates="owner")
 

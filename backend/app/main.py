@@ -5,9 +5,9 @@ from fastapi import FastAPI, Depends, status, Query
 from sqlmodel import Session, create_engine, SQLModel
 from .models import User, Task
 from .crud import *
-from typing import Annotated, List
+from typing import Annotated, Dict, List
 from contextlib import asynccontextmanager
-from .schemas import HealthCheck, TaskCreate, UserCreate, TaskUpdate
+from .schemas import HealthCheck, TaskCreate, UserCreate, TaskUpdate, TaskStats, UserProfile, UserUpdateRequest
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
@@ -49,8 +49,6 @@ def get_session():
     with Session(engine) as session:
         yield session
 
-SessionDep = Annotated[Session, Depends(get_session)]
-
 oauth2_scheme = HTTPBearer()
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme)):
@@ -74,13 +72,17 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(oauth2_sche
     except jwt.PyJWKError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
+SessionDep = Annotated[Session, Depends(get_session)]
+TokenDep = Annotated[Dict, Depends(verify_token)]
+
 @app.get("/tasks", response_model=List[Task])
 def filter_sort_tasks(
     db: SessionDep,
+    token: TokenDep,
     user_id: str,
     sort_by: str = Query("Creation Date", enum=["Creation Date", "Deadline", "Completion Status", "Priority"]),
     filter_by: str = Query("All", enum=["All", "Completed", "Incomplete"]),
-    token: dict = Depends(verify_token)
 ):
     """
     Endpoint to filter and sort tasks for a given user.
@@ -98,14 +100,14 @@ def filter_sort_tasks(
     return filter_and_sort_tasks(tasks, filter_by, sort_by)
 
 @app.post("/users", response_model=UserCreate)
-def create_user_endpoint(user: UserCreate, db: SessionDep, _: dict = Depends(verify_token)):
+def create_user_endpoint(user: UserCreate, db: SessionDep, _: TokenDep):
     """
     Endpoint to create a new user.
     """
     return create_user(db, user)
 
 @app.post("/tasks", response_model=Task)
-def create_task_endpoint(task: TaskCreate, db: SessionDep, token: dict = Depends(verify_token)):
+def create_task_endpoint(task: TaskCreate, db: SessionDep, token: TokenDep):
     """
     Endpoint to create a new task given a specific user.
     """
@@ -119,7 +121,7 @@ def create_task_endpoint(task: TaskCreate, db: SessionDep, token: dict = Depends
     return create_task(db, task)
 
 @app.put("/tasks/{task_id}", response_model=Task)
-def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep, token: dict = Depends(verify_token)):
+def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep, token: TokenDep):
     """
     Endpoint to change the task specification.
     """
@@ -131,7 +133,7 @@ def update_task_endpoint(task_id: int, task: TaskUpdate, db: SessionDep, token: 
     return update_task(db, task_id, task)
 
 @app.delete("/tasks/{task_id}", response_model=dict)
-def delete_task_endpoint(task_id: int, db: SessionDep, token: dict = Depends(verify_token)):
+def delete_task_endpoint(task_id: int, db: SessionDep, token: TokenDep):
     """
     Endpoint to delete a task from a specific user.
     """
@@ -142,6 +144,39 @@ def delete_task_endpoint(task_id: int, db: SessionDep, token: dict = Depends(ver
 
     delete_task(db, task_id)
     return {"message": "Task deleted successfully"}
+
+@app.get("/tasks/stats/{user_sub}", response_model=TaskStats)
+def get_task_statistics_endpoint(user_id: str, db: SessionDep, token: TokenDep):
+    """
+    Endpoint to get task stats.
+    """
+    token_user_id = token.get("sub")
+    if not token_user_id:
+        raise HTTPException(status_code=401, detail="Invalid token: 'sub' claim is missing or invalid")
+
+    if token_user_id != user_id:
+        raise HTTPException(status_code=401, detail="User ID mismatch")
+
+    return get_task_statistics(user_id, db) 
+
+@app.get("/users/{user_id}", response_model=UserProfile)
+def get_user_endpoint(user_id: str, db: SessionDep, token: TokenDep):
+    if user_id != token.get("sub"):
+        raise HTTPException(status_code=403, detail="Not authorized to update this task")
+
+    user = get_user(db, user_id) 
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user 
+
+@app.put("/users/{user_id}", response_model=UserProfile)
+def update_user_profile_endpoint(user_id: str, update_request: UserUpdateRequest, db: SessionDep, token: TokenDep):
+    if user_id != token.get("sub"):
+        raise HTTPException(status_code=403, detail="Not authorized to update this task")
+
+    return update_user_profile(user_id, update_request, db) 
 
 @app.get("/health", status_code=status.HTTP_200_OK, response_model=HealthCheck)
 def health():
