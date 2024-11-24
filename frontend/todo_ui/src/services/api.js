@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000"; // Replace with actual backend URL
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 // Fetch user profile
 export const getUserProfile = async (userId, idToken) => {

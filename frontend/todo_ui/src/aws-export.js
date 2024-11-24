@@ -3,25 +3,23 @@ const awsConfig = {
   Auth: {
     Cognito: {
       // REQUIRED - Amazon Cognito Region
-      region: 'eu-west-1',
+      region: process.env.REACT_APP_REGION,
 
       // Amazon Cognito User Pool ID
-      userPoolId: 'eu-west-1_7GnxkjJTp',
+      userPoolId: process.env.REACT_APP_USER_POOL_ID,
 
       // Amazon Cognito Web Client ID (26-char alphanumeric string)
-      userPoolClientId: '2rboagge3tq8c6r3igp01ehtgd',
-
-      // identityPoolId: 'eu-west-1:c3fbe446-0655-4812-a342-8645518594c4',
+      userPoolClientId: process.env.REACT_APP_USER_POOL_CLIENT_ID,
 
       // Enforce user authentication prior to accessing AWS resources or not
       mandatorySignIn: false,
 
       loginWith: {
         oauth: {
-          domain: 'todo-auth-domain.auth.eu-west-1.amazoncognito.com',
+          domain: process.env.REACT_APP_COGNITO_DOMAIN,
           scopes: ['openid', 'email', 'profile', 'aws.cognito.signin.user.admin'],
-          redirectSignIn: ['http://localhost:3000/reminders'],
-          redirectSignOut: ['http://localhost:3000/'],
+          redirectSignIn: [`${process.env.REACT_APP_FRONTEND_URL}/reminders`],
+          redirectSignOut: [`${process.env.REACT_APP_FRONTEND_URL}/`],
           responseType: 'code', // or 'token', 'code' for Authorization code grant
         },
         email: 'true', // Optional
