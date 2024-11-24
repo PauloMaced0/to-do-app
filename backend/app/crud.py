@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List, Sequence
+from typing import Sequence
 from sqlmodel import Session, select, func
 from .models import Task, User
 from .schemas import UserCreate, TaskCreate, TaskUpdate, TaskStats, UserUpdateRequest
@@ -101,17 +101,15 @@ def get_task_statistics(user_id: str, db: Session) -> TaskStats:
         raise HTTPException(status_code=404, detail="User not found")
 
     # Count total tasks created by the user
-    total_tasks = db.exec(select(Task).where(Task.owner_id == user_id)).count()
-
-    # Count completed tasks by the user
-    completed_tasks = db.exec(
-        select(Task).where(Task.owner_id == user_id, Task.completed == True)
-    ).count()
+    total_tasks = db.exec(select(func.count(Task.id)).where(Task.owner_id == user_id)).one()
+    
+    # Completed tasks
+    completed_tasks = db.exec(select(func.count(Task.id)).where(Task.owner_id == user_id, Task.completed == True)).one()
 
     # Return the structured response
     return TaskStats(
-        total_tasks_created=total_tasks,
-        total_tasks_completed=completed_tasks,
+        total_tasks_created=total_tasks or 0,
+        total_tasks_completed=completed_tasks or 0,
     )
 
 def update_user_profile(user_id: str, update_request: UserUpdateRequest, db):
