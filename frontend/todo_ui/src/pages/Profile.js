@@ -29,27 +29,27 @@ function UserProfile() {
     }).format(date);
   };
 
-  const fetchUserProfile = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      const session = await fetchAuthSession();
-      const userData = await getUserProfile(currentUser.userId, session.tokens.idToken);
-      const userTasksStats = await getUserTaskStats(currentUser.userId, session.tokens.idToken);
-
-      setName(userData.full_name || "");
-      setPhone(userData.phone_number || "");
-      setEmail(userData.username || "");
-      setAccountDate(formatDate(userData.created_at) || "");
-      setNTasks(userTasksStats.total_tasks_created || 0);
-      setTasksCompleted(userTasksStats.total_tasks_completed || 0);
-      setBackupName(userData.full_name || "");
-      setBackupPhone(userData.phone_number || "");
-    } catch (error) {
-      console.error("Failed to fetch user profile:", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        const session = await fetchAuthSession();
+        const userData = await getUserProfile(currentUser.userId, session.tokens.idToken);
+        const userTasksStats = await getUserTaskStats(currentUser.userId, session.tokens.idToken);
+
+        setName(userData.full_name || "");
+        setPhone(userData.phone_number || "");
+        setEmail(userData.username || "");
+        setAccountDate(formatDate(userData.created_at) || "");
+        setNTasks(userTasksStats.total_tasks_created || 0);
+        setTasksCompleted(userTasksStats.total_tasks_completed || 0);
+        setBackupName(userData.full_name || "");
+        setBackupPhone(userData.phone_number || "");
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
     fetchUserProfile();
   }, []);
 
@@ -101,13 +101,6 @@ function UserProfile() {
                     Personal information and application details.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium 
-                  hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Change Password
-                </button>
               </div>
               <div className="border-t border-gray-200">
                 <dl>

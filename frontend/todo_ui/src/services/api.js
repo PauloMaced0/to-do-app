@@ -89,7 +89,7 @@ export const deleteUserTask = async (taskId, idToken) => {
   return response.data;
 }
 
-export const completeUserTask = async (taskId, idToken, taskPayload) => {
+export const completeUserTask = async (taskId, taskPayload, idToken) => {
   const response = await axios.put(`${API_BASE_URL}/tasks/${taskId}`, taskPayload, {
     headers: {
       Authorization: `Bearer ${idToken}`,
