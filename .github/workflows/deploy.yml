@@ -33,6 +33,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        if: success()
         run: terraform apply -auto-approve
 
       # Step 5: Capture Backend Outputs
@@ -60,6 +61,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        if: success()
         run: terraform apply -auto-approve
 
       # Step 8: Capture Frontend Outputs
@@ -81,7 +83,7 @@ jobs:
           export REACT_APP_USER_POOL_ID=$(cat ../../infra/backend/USER_POOL_ID)
           export REACT_APP_USER_POOL_CLIENT_ID=$(cat ../../infra/backend/USER_POOL_CLIENT_ID)
           export REACT_APP_COGNITO_DOMAIN=$(cat ../../infra/backend/COGNITO_DOMAIN)
-          export REACT_APP_BACKEND_URL=$(cat ../../infra/frontend/BACKEND_URL)
+          export REACT_APP_BACKEND_URL=$(cat ../../infra/backend/BACKEND_URL)
           export REACT_APP_FRONTEND_URL=$(cat ../../infra/frontend/FRONTEND_URL)
           npm install
           npm run build
@@ -96,3 +98,23 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Commit and Push Terraform Backend State 
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./infra/backend/terraform.tfstate
+          git commit -m "Update Backend Terraform state after deployment"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
+
+      - name: Commit and Push Terraform Frontend State 
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./infra/frontend/terraform.tfstate
+          git commit -m "Update Frontend Terraform state after deployment"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
