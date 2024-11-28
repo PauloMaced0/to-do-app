@@ -8,11 +8,6 @@ output "user_pool_client_id" {
   value       = aws_cognito_user_pool_client.client.id
 }
 
-output "identity_pool_id" {
-  description = "ID of the Cognito Identity Pool"
-  value       = aws_cognito_identity_pool.identity_pool.id
-}
-
 output "domain" {
   description = "Cognito User Pool Domain"
   value       = aws_cognito_user_pool_domain.domain.domain

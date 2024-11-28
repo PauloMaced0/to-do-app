@@ -1,13 +1,13 @@
 module "cognito" {
   source = "../modules/cognito"
 
-  user_pool_name                = "example-user-pool"
-  client_name                   = "example-client"
-  domain                        = "example-domain"
-  identity_pool_name            = "example-identity-pool"
-  region                        = "us-east-1"
-  callback_urls                 = ["https://localhost:3000/reminders"] 
-  logout_urls                   = ["https://localhost:3000/"]
+  user_pool_name                = "todo-auth"
+  client_name                   = "todo-client"
+  domain                        = "todo-domain"
+  identity_pool_name            = "todo-identity-pool"
+  region                        = "eu-west-1"
+  callback_urls                 = ["${aws_apigatewayv2_api.apigw.api_endpoint}/reminders"] 
+  logout_urls                   = ["${aws_apigatewayv2_api.apigw.api_endpoint}/"]
   allowed_oauth_flows           = ["code", "implicit"]
   allowed_oauth_scopes          = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
   explicit_auth_flows           = ["ALLOW_CUSTOM_AUTH", "ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_PASSWORD_AUTH", "ALLOW_USER_SRP_AUTH"]
