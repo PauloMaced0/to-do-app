@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000"; // Replace with actual backend URL
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 // Fetch user profile
 export const getUserProfile = async (userId, idToken) => {
@@ -89,7 +89,7 @@ export const deleteUserTask = async (taskId, idToken) => {
   return response.data;
 }
 
-export const completeUserTask = async (taskId, idToken, taskPayload) => {
+export const completeUserTask = async (taskId, taskPayload, idToken) => {
   const response = await axios.put(`${API_BASE_URL}/tasks/${taskId}`, taskPayload, {
     headers: {
       Authorization: `Bearer ${idToken}`,

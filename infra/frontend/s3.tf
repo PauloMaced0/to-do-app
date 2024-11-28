@@ -56,16 +56,16 @@ resource "aws_s3_bucket_policy" "static_site_bucket_policy" {
   policy = data.aws_iam_policy_document.s3_bucket_policy.json
 }
 
-locals {
-  send_to_s3 = "aws s3 cp ../src s3://${aws_s3_bucket.todoui.id}/ --recursive"
-}
+# locals {
+#   send_to_s3 = "aws s3 cp ../../frontend/todo_ui/build s3://${aws_s3_bucket.todoui.id}/ --recursive"
+# }
 
-resource "null_resource" "send_s3" {
-  provisioner "local-exec" {
-      command                     = local.send_to_s3
-  }
-  triggers = {
-      "run_at"                    = timestamp()
-  }
-  depends_on                      = [aws_s3_bucket.todoui]
-}
+# resource "null_resource" "send_s3" {
+#   provisioner "local-exec" {
+#       command                     = local.send_to_s3
+#   }
+#   triggers = {
+#       "run_at"                    = timestamp()
+#   }
+#   depends_on                      = [aws_s3_bucket.todoui]
+# }

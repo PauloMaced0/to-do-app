@@ -35,13 +35,14 @@ app.add_middleware(
 )
 
 # Session middleware
-SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')
+SECRET_KEY = os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf')
+REGION = os.getenv('REGION', 'eu-west-1')
+USER_POOL_ID = os.getenv('USER_POOL_ID', 'eu-west-1_7GnxkjJTp')
+CLIENT_ID = os.getenv('CLIENT_ID', '2rboagge3tq8c6r3igp01ehtgd')
+
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # AWS Cognito configuration
-REGION = 'eu-west-1'
-USER_POOL_ID = 'eu-west-1_7GnxkjJTp'
-CLIENT_ID = '2rboagge3tq8c6r3igp01ehtgd'
 COGNITO_KEYS_URL = f'https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json'
 
 # Dependency to get DB session
