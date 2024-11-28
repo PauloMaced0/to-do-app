@@ -10,6 +10,16 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt && \
     apk --no-cache add curl
 
+# Set build-time arguments
+ARG REGION
+ARG USER_POOL_ID
+ARG CLIENT_ID
+
+# Set environment variables
+ENV REGION=${REGION}
+ENV USER_POOL_ID=${USER_POOL_ID}
+ENV CLIENT_ID=${CLIENT_ID}
+
 # Copy the FastAPI application code
 COPY . .
 
