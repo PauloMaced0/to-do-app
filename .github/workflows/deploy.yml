@@ -68,6 +68,7 @@ jobs:
         id: frontend_outputs
         run: |
           terraform output -raw cloudfront_distribution_domain_name > FRONTEND_URL
+          terraform output -raw s3_bucket_name > S3_BUCKET_NAME
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -76,12 +77,12 @@ jobs:
       - name: Build React App
         working-directory: ./frontend/todo_ui
         run: |
-          export REACT_APP_REGION=$(cat ../../terraform/backend/REGION)
-          export REACT_APP_USER_POOL_ID=$(cat ../../terraform/backend/USER_POOL_ID)
-          export REACT_APP_USER_POOL_CLIENT_ID=$(cat ../../terraform/backend/USER_POOL_CLIENT_ID)
-          export REACT_APP_COGNITO_DOMAIN=$(cat ../../terraform/backend/COGNITO_DOMAIN)
-          export REACT_APP_BACKEND_URL=$(cat ../../terraform/frontend/BACKEND_URL)
-          export REACT_APP_FRONTEND_URL=$(cat ../../terraform/frontend/FRONTEND_URL)
+          export REACT_APP_REGION=$(cat ../../infra/backend/REGION)
+          export REACT_APP_USER_POOL_ID=$(cat ../../infra/backend/USER_POOL_ID)
+          export REACT_APP_USER_POOL_CLIENT_ID=$(cat ../../infra/backend/USER_POOL_CLIENT_ID)
+          export REACT_APP_COGNITO_DOMAIN=$(cat ../../infra/backend/COGNITO_DOMAIN)
+          export REACT_APP_BACKEND_URL=$(cat ../../infra/frontend/BACKEND_URL)
+          export REACT_APP_FRONTEND_URL=$(cat ../../infra/frontend/FRONTEND_URL)
           npm install
           npm run build
         env:
@@ -91,7 +92,7 @@ jobs:
       # Step 10: Upload React Build to S3
       - name: Upload React Build to S3
         working-directory: ./frontend/todo_ui
-        run: aws s3 cp ./build s3://$(terraform output -raw s3_bucket_name) --recursive
+        run: aws s3 cp ./build s3://$(cat ../../infra/frontend/S3_BUCKET_NAME) --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
