@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { signInWithRedirect, getCurrentUser} from "aws-amplify/auth";
 import { useNavigate } from "react-router-dom";
+import { setUserAccount } from '../services/api';
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -23,14 +23,8 @@ function Home() {
         username: session.tokens.idToken.payload["email"],
         sub: currentUser.userId,
       };
-
+      await setUserAccount(session.tokens.idToken, userPayload);
       // Send user data with Authorization header
-      await axios.post("http://localhost:8000/users", userPayload, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
 
     } catch (error) {
       console.error(error);

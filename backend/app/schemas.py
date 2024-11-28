@@ -26,7 +26,7 @@ class Task(TaskBase):
     created_at: date
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserBase(BaseModel):
     username: str
@@ -34,12 +34,18 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     sub: str
 
-class User(UserBase):
-    id: int
+class UserProfile(UserCreate):
+    full_name: Optional[str]
+    phone_number: Optional[str]
+    created_at: date
 
-    class Config:
-        orm_mode = True
+class UserUpdateRequest(BaseModel):
+    full_name: Optional[str]
+    phone_number: Optional[str]
 
 class HealthCheck(BaseModel):
     status: str = "OK"
 
+class TaskStats(BaseModel):
+    total_tasks_created: int
+    total_tasks_completed: int

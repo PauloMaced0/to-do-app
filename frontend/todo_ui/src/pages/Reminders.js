@@ -1,14 +1,13 @@
 // src/pages/Reminders.js
-import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import NavBar from '../components/NavBar';
-import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import TaskModal from '../components/TaskModal';
 import FilterSortOptions from '../components/FilterSortOptions';
 import TaskList from '../components/TaskList';
+import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
+import { completeUserTask, createUserTask, deleteUserTask, getUserTasks, updateUserTask } from '../services/api';
 
 function Reminders() {
-
   const [sortBy, setSortBy] = useState("Creation Date");
   const [filterBy, setFilterBy] = useState("All");
 
@@ -17,31 +16,27 @@ function Reminders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
+  const [currentTask, setCurrentTask] = useState(null);
 
-  const fetchTasks = async () => {
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentTask(null); // Reset current task when modal closes
+  };
+
+  const fetchTasks = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser();
       const session = await fetchAuthSession();
 
-      const response = await axios.get(`http://localhost:8000/tasks?user_id=${currentUser.userId}&sort_by=${sortBy}&filter_by=${filterBy}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
+      const response = await getUserTasks(currentUser.userId, filterBy, sortBy, session.tokens.idToken); 
 
-      setTasks(response.data); // Set tasks to the state
+      setTasks(response); // Set tasks to the state
       setLoading(false); // Set loading to false when data is loaded
     } catch (err) {
       setError("Failed to fetch tasks");
       setLoading(false); // Set loading to false even on error
     }
-  };
-
-  useEffect(() => {
-    fetchTasks();
   }, [sortBy, filterBy]);
 
   const handleTaskSubmission = async (event) => {
@@ -60,24 +55,71 @@ function Reminders() {
     console.log("Task Submitted:", task);
 
     try {
-      // Make an HTTP POST request to save the task
-      const response = await axios.post("http://localhost:8000/tasks", task, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.tokens.idToken}`,
-        },
-      });
+      // If editing an existing task, send PUT request
+      if (currentTask) {
+        const updatedTask = await updateUserTask(currentTask.id, task, session.tokens.idToken);
+        console.log("Task Updated Successfully:", updatedTask);
 
-      const createdTask = await response.data;
-      console.log("Task Created Successfully:", createdTask);
+        // Update the task list
+        setTasks((prevTasks) =>
+          prevTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+        );
+      } else {
+        // If creating a new task, send POST request
+        const createdTask = await createUserTask(task, session.tokens.idToken);
+        console.log("Task Created Successfully:", createdTask);
 
-      // Close the modal on success
-      fetchTasks();
+        // Add the new task to the list
+        setTasks((prevTasks) => [...prevTasks, createdTask]);
+      }
       handleCloseModal();
     } catch (error) {
-      console.error("Failed to create task:", error.message);
+      console.error("Failed to save task:", error.message);
     }
   };
+
+  const handleDelete = async (id) => {
+    try {
+      const session = await fetchAuthSession();
+
+      const deletedTask = await deleteUserTask(id, session.tokens.idToken);
+      console.log("Task Deleted Successfully:", deletedTask);
+
+    } catch (error) {
+      console.error("Failed to delete task:", error.message);
+    }
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+  };
+
+  const handleComplete = async (id) => {
+    try {
+      const session = await fetchAuthSession();
+
+      const taskPayload = {
+        title: null,
+        description: null,
+        completed: true,
+        deadline: null,
+        priority: null 
+      };
+
+      const completedTask = await completeUserTask(id, taskPayload, session.tokens.idToken);
+      console.log("Task Completed:", completedTask);
+
+    } catch (error) {
+      console.error("Failed to complete task:", error.message);
+    }
+    setTasks((prevTasks) => prevTasks.map((task) => task.id === id ? { ...task, completed: true} : task));
+  };
+
+  const handleEdit = async (task) => {
+    setCurrentTask(task);
+    handleOpenModal();
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   return (
     <div className="min-h-full">
@@ -86,8 +128,9 @@ function Reminders() {
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           <TaskModal
             isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={(e) => handleTaskSubmission(e, fetchTasks, () => setIsModalOpen(false))}
+            onClose={handleCloseModal}
+            onSubmit={(e) => handleTaskSubmission(e)}
+            task={currentTask}
           />
           <div className="px-4 py-3 sm:px-0">
             <div>
@@ -114,7 +157,14 @@ function Reminders() {
                 onFilterChange={(e) => setFilterBy(e.target.value)}
               />
               <hr className="border-t border-gray-300 my-4" />
-              <TaskList tasks={tasks} loading={loading} error={error} />
+              <TaskList 
+                tasks={tasks} 
+                loading={loading} 
+                error={error} 
+                onDelete={handleDelete} 
+                onComplete={handleComplete}
+                onEdit={handleEdit}
+              />
             </div>
           </div>
         </div>
