@@ -114,6 +114,15 @@ jobs:
           export REACT_APP_COGNITO_DOMAIN=$(cat ../../infra/backend/COGNITO_DOMAIN)
           export REACT_APP_BACKEND_URL=$(cat ../../infra/backend/BACKEND_URL)
           export REACT_APP_FRONTEND_URL=$(cat ../../infra/frontend/FRONTEND_URL)
+          
+          # Display the variables for debugging
+          echo "REACT_APP_REGION: $REACT_APP_REGION"
+          echo "REACT_APP_USER_POOL_ID: $REACT_APP_USER_POOL_ID"
+          echo "REACT_APP_USER_POOL_CLIENT_ID: $REACT_APP_USER_POOL_CLIENT_ID"
+          echo "REACT_APP_COGNITO_DOMAIN: $REACT_APP_COGNITO_DOMAIN"
+          echo "REACT_APP_BACKEND_URL: $REACT_APP_BACKEND_URL"
+          echo "REACT_APP_FRONTEND_URL: $REACT_APP_FRONTEND_URL"
+
           npm install
           npm run build
         env:
@@ -123,7 +132,10 @@ jobs:
       # Upload React Build to S3
       - name: Upload React Build to S3
         working-directory: ./frontend/todo_ui
-        run: aws s3 cp ./build s3://$(cat ../../infra/frontend/S3_BUCKET_NAME)/ --recursive
+        run: |
+          S3_BUCKET_NAME=$(cat ../../infra/frontend/S3_BUCKET_NAME)
+          echo "Uploading to S3 Bucket: $S3_BUCKET_NAME"
+          aws s3 cp ./build s3://$S3_BUCKET_NAME/ --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
