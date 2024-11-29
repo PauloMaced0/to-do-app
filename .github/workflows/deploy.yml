@@ -8,6 +8,7 @@ on:
 
 jobs:
   terraform-deploy:
+    if: github.actor != 'github-actions[bot]'
     name: Deploy Backend and Frontend Infrastructure
     runs-on: ubuntu-latest
 
@@ -59,14 +60,14 @@ jobs:
             else
               echo "Changes detected in terraform.tfstate"
               git add ./infra/backend/terraform.tfstate
-              git commit -m "Update Backend Terraform state after destruction"
+              git commit -m "Update Backend Terraform state after deploy"
               git push origin main
             fi
           else
             # File is new (untracked)
             echo "terraform.tfstate is a new file. Adding to the repository."
             git add ./infra/backend/terraform.tfstate
-            git commit -m "Add Backend Terraform state after destruction"
+            git commit -m "Add Backend Terraform state after deploy"
             git push origin main
           fi
         env:
@@ -146,14 +147,14 @@ jobs:
             else
               echo "Changes detected in terraform.tfstate"
               git add ./infra/frontend/terraform.tfstate
-              git commit -m "Update Frontend Terraform state after destruction"
+              git commit -m "Update Frontend Terraform state after deploy"
               git push origin main
             fi
           else
             # File is new (untracked)
             echo "terraform.tfstate is a new file. Adding to the repository."
             git add ./infra/frontend/terraform.tfstate
-            git commit -m "Add Frontend Terraform state after destruction"
+            git commit -m "Add Frontend Terraform state after deploy"
             git push origin main
           fi
         env:
