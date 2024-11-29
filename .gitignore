@@ -3,6 +3,12 @@ yarn.lock
 
 dist/
 
+# terraform files
+infra/backend/.terraform
+infra/frontend/.terraform
+infra/cognito/.terraform
+infra/modules/cognito/.terraform
+
 # dependencies
 frontend/todo_ui/node_modules
 /.pnp
