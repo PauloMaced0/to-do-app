@@ -3,7 +3,7 @@ locals {
     s3_domain_name = aws_s3_bucket.todoui.bucket_regional_domain_name
 }
 
-resource "aws_cloudfront_origin_access_control" "s3_access_control" {
+resource "aws_cloudfront_origin_access_control" "s3_origin_access_control" {
     name                              = "${var.s3_bucket_name}-oac"
     description                       = "OAC for ${var.s3_bucket_name}"
     origin_access_control_origin_type = "s3"
