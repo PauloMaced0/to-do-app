@@ -42,9 +42,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ./infra/backend/terraform.tfstate
-          git commit -m "Update Backend Terraform state after deployment"
-          git push origin main
+          if git diff --quiet ./infra/backend/terraform.tfstate; then
+            echo "No changes to commit for terraform.tfstate"
+          else
+            git add ./infra/backend/terraform.tfstate 
+            git commit -m "Update Backend Terraform state after destruction"
+            git push origin main
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
 
@@ -115,8 +119,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ./infra/frontend/terraform.tfstate
-          git commit -m "Update Frontend Terraform state after deployment"
-          git push origin main
+          if git diff --quiet ./infra/frontend/terraform.tfstate; then
+            echo "No changes to commit for terraform.tfstate"
+          else
+            git add ./infra/frontend/terraform.tfstate
+            git commit -m "Update Frontend Terraform state after deployment"
+            git push origin main
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
