@@ -12,22 +12,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Terraform
+      # Set up Terraform
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      # Step 3: Terraform Init (Backend)
+      # Terraform Init (Backend)
       - name: Initialize Terraform for Backend
         working-directory: ./infra/backend
         run: terraform init
 
-      # Step 4: Terraform Apply (Backend)
+      # Terraform Apply (Backend)
       - name: Apply Backend Terraform Configuration
         working-directory: ./infra/backend
         env:
@@ -36,7 +36,17 @@ jobs:
         if: success()
         run: terraform apply -auto-approve
 
-      # Step 5: Capture Backend Outputs
+      - name: Commit and Push Terraform Backend State 
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ./infra/backend/terraform.tfstate
+          git commit -m "Update Backend Terraform state after deployment"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
+
+      # Capture Backend Outputs
       - name: Get Backend Outputs
         working-directory: ./infra/backend
         id: backend_outputs
@@ -50,12 +60,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      # Step 6: Terraform Init (Frontend)
+      # Terraform Init (Frontend)
       - name: Initialize Terraform for Frontend
         working-directory: ./infra/frontend
         run: terraform init
 
-      # Step 7: Terraform Apply (Frontend)
+      # Terraform Apply (Frontend)
       - name: Apply Frontend Terraform Configuration
         working-directory: ./infra/frontend
         env:
@@ -64,7 +74,7 @@ jobs:
         if: success()
         run: terraform apply -auto-approve
 
-      # Step 8: Capture Frontend Outputs
+      # Capture Frontend Outputs
       - name: Get Frontend Outputs
         working-directory: ./infra/frontend
         id: frontend_outputs
@@ -75,7 +85,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      # Step 9: Build React App
+      # Build React App
       - name: Build React App
         working-directory: ./frontend/todo_ui
         run: |
@@ -91,23 +101,13 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      # Step 10: Upload React Build to S3
+      # Upload React Build to S3
       - name: Upload React Build to S3
         working-directory: ./frontend/todo_ui
         run: aws s3 cp ./build s3://$(cat ../../infra/frontend/S3_BUCKET_NAME) --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Commit and Push Terraform Backend State 
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ./infra/backend/terraform.tfstate
-          git commit -m "Update Backend Terraform state after deployment"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
 
       - name: Commit and Push Terraform Frontend State 
         run: |
