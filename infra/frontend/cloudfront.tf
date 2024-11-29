@@ -18,7 +18,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distrib" {
     origin {
 	origin_id                = local.s3_origin_id
 	domain_name              = local.s3_domain_name
-	origin_access_control_id = aws_cloudfront_origin_access_control.s3_access_control.id
+	origin_access_control_id = aws_cloudfront_origin_access_control.s3_origin_access_control.id
     }
 
     default_cache_behavior {
