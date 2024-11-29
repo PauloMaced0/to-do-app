@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'infra/backend/terraform.tfstate'
+      - 'infra/frontend/terraform.tfstate'
   workflow_dispatch:
 
 jobs:
   terraform-deploy:
-    if: github.actor != 'github-actions[bot]'
     name: Deploy Backend and Frontend Infrastructure
     runs-on: ubuntu-latest
 
