@@ -52,11 +52,21 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet ./infra/backend/terraform.tfstate; then
-            echo "No changes to commit for terraform.tfstate"
+          if git ls-files ./infra/backend/terraform.tfstate --error-unmatch > /dev/null 2>&1; then
+            # File is tracked, check for changes
+            if git diff --quiet ./infra/backend/terraform.tfstate; then
+              echo "No changes to commit for terraform.tfstate"
+            else
+              echo "Changes detected in terraform.tfstate"
+              git add ./infra/backend/terraform.tfstate
+              git commit -m "Update Backend Terraform state after destruction"
+              git push origin main
+            fi
           else
-            git add ./infra/backend/terraform.tfstate 
-            git commit -m "Update Backend Terraform state after destruction"
+            # File is new (untracked)
+            echo "terraform.tfstate is a new file. Adding to the repository."
+            git add ./infra/backend/terraform.tfstate
+            git commit -m "Add Backend Terraform state after destruction"
             git push origin main
           fi
         env:
@@ -129,11 +139,21 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet ./infra/frontend/terraform.tfstate; then
-            echo "No changes to commit for terraform.tfstate"
+          if git ls-files ./infra/frontend/terraform.tfstate --error-unmatch > /dev/null 2>&1; then
+            # File is tracked, check for changes
+            if git diff --quiet ./infra/frontend/terraform.tfstate; then
+              echo "No changes to commit for terraform.tfstate"
+            else
+              echo "Changes detected in terraform.tfstate"
+              git add ./infra/frontend/terraform.tfstate
+              git commit -m "Update Frontend Terraform state after destruction"
+              git push origin main
+            fi
           else
+            # File is new (untracked)
+            echo "terraform.tfstate is a new file. Adding to the repository."
             git add ./infra/frontend/terraform.tfstate
-            git commit -m "Update Frontend Terraform state after deployment"
+            git commit -m "Add Frontend Terraform state after destruction"
             git push origin main
           fi
         env:
