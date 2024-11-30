@@ -42,6 +42,30 @@ jobs:
         if: success()
         run: terraform apply -auto-approve
 
+      - name: Commit and Push Terraform Frontend State 
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git ls-files ./infra/frontend/terraform.tfstate --error-unmatch > /dev/null 2>&1; then
+            # File is tracked, check for changes
+            if git diff --quiet ./infra/frontend/terraform.tfstate; then
+              echo "No changes to commit for terraform.tfstate"
+            else
+              echo "Changes detected in terraform.tfstate"
+              git add ./infra/frontend/terraform.tfstate
+              git commit -m "Update Frontend Terraform state after deploy"
+              git push origin main
+            fi
+          else
+            # File is new (untracked)
+            echo "terraform.tfstate is a new file. Adding to the repository."
+            git add ./infra/frontend/terraform.tfstate
+            git commit -m "Add Frontend Terraform state after deploy"
+            git push origin main
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
+
       # Capture Frontend Outputs
       - name: Get Frontend Outputs
         working-directory: ./infra/frontend
@@ -142,27 +166,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: 'eu-west-1'
-
-      - name: Commit and Push Terraform Frontend State 
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git ls-files ./infra/frontend/terraform.tfstate --error-unmatch > /dev/null 2>&1; then
-            # File is tracked, check for changes
-            if git diff --quiet ./infra/frontend/terraform.tfstate; then
-              echo "No changes to commit for terraform.tfstate"
-            else
-              echo "Changes detected in terraform.tfstate"
-              git add ./infra/frontend/terraform.tfstate
-              git commit -m "Update Frontend Terraform state after deploy"
-              git push origin main
-            fi
-          else
-            # File is new (untracked)
-            echo "terraform.tfstate is a new file. Adding to the repository."
-            git add ./infra/frontend/terraform.tfstate
-            git commit -m "Add Frontend Terraform state after deploy"
-            git push origin main
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.STATE_TOKEN }}
