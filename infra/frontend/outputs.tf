@@ -8,9 +8,11 @@
 # }
 
 output "cloudfront_distribution_domain_name" {
-  value = aws_cloudfront_distribution.cloudfront_distrib.domain_name
+  description = "Cloudfront domain name"
+  value = try(aws_cloudfront_distribution.cloudfront_distrib.domain_name, null)
 }
 
 output "s3_bucket_name" {
-  value = aws_s3_bucket.todoui.id
+  description = "The name of the S3 bucket"
+  value = try(aws_s3_bucket.todoui.id, null)
 }
