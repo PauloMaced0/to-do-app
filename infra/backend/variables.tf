@@ -75,3 +75,9 @@ variable "db_password" {
   description = "Database password"
   type        = string
 }
+
+variable "frontend_url" {
+  description = "Frontend url for callback and logout"
+  type = string
+}
+
