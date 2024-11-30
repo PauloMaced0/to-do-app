@@ -11,13 +11,21 @@ resource "aws_s3_bucket" "todoui" {
 #   }
 # }
 
+resource "aws_s3_bucket_website_configuration" "todoui_website_configuration" {
+  bucket = aws_s3_bucket.todoui.id
+
+  index_document {
+    suffix = "index.html"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "todoui_pub_access_block" {
   bucket = aws_s3_bucket.todoui.id
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 # resource "aws_s3_bucket_acl" "bucket-acl" {
@@ -47,6 +55,18 @@ data "aws_iam_policy_document" "s3_bucket_policy" {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
       values   = [aws_cloudfront_distribution.cloudfront_distrib.arn]
+    }
+  }
+  statement {
+    sid    = "PublicReadGetObject"
+    effect = "Allow"
+
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.todoui.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
     }
   }
 }
