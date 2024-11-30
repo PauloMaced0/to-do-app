@@ -19,14 +19,14 @@ resource "aws_s3_bucket_website_configuration" "todoui_website_configuration" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "todoui_pub_access_block" {
-  bucket = aws_s3_bucket.todoui.id
-
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
+# resource "aws_s3_bucket_public_access_block" "todoui_pub_access_block" {
+#   bucket = aws_s3_bucket.todoui.id
+#
+#   block_public_acls       = false
+#   block_public_policy     = false
+#   ignore_public_acls      = false
+#   restrict_public_buckets = false
+# }
 
 # resource "aws_s3_bucket_acl" "bucket-acl" {
 #   depends_on = [
@@ -38,62 +38,37 @@ resource "aws_s3_bucket_public_access_block" "todoui_pub_access_block" {
 #   acl    = "private"
 # }
 
-# data "aws_iam_policy_document" "s3_bucket_policy" {
-#   statement {
-#     sid    = "AllowCloudFrontServicePrincipalReadOnly"
-#     effect = "Allow"
-#
-#     actions   = ["s3:GetObject"]
-#     resources = ["${aws_s3_bucket.todoui.arn}/*"]
-#
-#     principals {
-#       type        = "Service"
-#       identifiers = ["cloudfront.amazonaws.com"]
-#     }
-#
-#     condition {
-#       test     = "StringEquals"
-#       variable = "AWS:SourceArn"
-#       values   = [aws_cloudfront_distribution.cloudfront_distrib.arn]
-#     }
-#   }
-#
-#   statement {
-#     sid    = "PublicReadGetObject"
-#     effect = "Allow"
-#
-#     actions   = ["s3:GetObject"]
-#     resources = ["${aws_s3_bucket.todoui.arn}/*"]
-#
-#     principals {
-#       type        = "AWS"
-#       identifiers = ["*"]
-#     }
-#   }
-# }
+data "aws_iam_policy_document" "s3_bucket_policy" {
+  depends_on = [ 
+    aws_cloudfront_distribution.cloudfront_distrib,  
+    aws_s3_bucket.todoui
+  ]
+  statement {
+    sid    = "AllowCloudFrontServicePrincipalReadOnly"
+    effect = "Allow"
+
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.todoui.arn}/*"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.cloudfront_distrib.arn]
+    }
+  }
+}
 
 resource "aws_s3_bucket_policy" "static_site_bucket_policy" {
+  depends_on = [
+    aws_cloudfront_distribution.cloudfront_distrib
+  ]
   bucket = aws_s3_bucket.todoui.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid       = "AllowCloudFrontAccess"
-        Effect    = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.todoui.arn}/*"
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = aws_cloudfront_distribution.cloudfront_distrib.arn
-          }
-        }
-      }
-    ]
-  })
+  policy = data.aws_iam_policy_document.s3_bucket_policy.json
 }
 
 # locals {
