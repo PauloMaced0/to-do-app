@@ -6,8 +6,8 @@ module "cognito" {
   domain                        = "todo-domain"
   identity_pool_name            = "todo-identity-pool"
   region                        = "eu-west-1"
-  callback_urls                 = ["${var.frontend_url}/reminders"] 
-  logout_urls                   = ["${var.frontend_url}/"]
+  callback_urls                 = ["https://${var.frontend_url}/reminders"] 
+  logout_urls                   = ["https://${var.frontend_url}/"]
   allowed_oauth_flows           = ["code", "implicit"]
   allowed_oauth_scopes          = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
   explicit_auth_flows           = ["ALLOW_CUSTOM_AUTH", "ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_PASSWORD_AUTH", "ALLOW_USER_SRP_AUTH"]
