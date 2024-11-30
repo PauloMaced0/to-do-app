@@ -138,7 +138,7 @@ jobs:
           export REACT_APP_USER_POOL_ID=$(cat ../../infra/backend/USER_POOL_ID)
           export REACT_APP_USER_POOL_CLIENT_ID=$(cat ../../infra/backend/USER_POOL_CLIENT_ID)
           export REACT_APP_COGNITO_DOMAIN=$(cat ../../infra/backend/COGNITO_DOMAIN)
-          export REACT_APP_BACKEND_URL="https://$(cat ../../infra/backend/BACKEND_URL)"
+          export REACT_APP_BACKEND_URL=$(cat ../../infra/backend/BACKEND_URL)
           export REACT_APP_FRONTEND_URL="https://$(cat ../../infra/frontend/FRONTEND_URL)"
           
           # Display the variables for debugging
