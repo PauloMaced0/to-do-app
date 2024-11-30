@@ -10,7 +10,7 @@ output "user_pool_client_id" {
 
 output "domain" {
   description = "Cognito User Pool Domain"
-  value       = aws_cognito_user_pool_domain.domain.domain
+  value       = aws_cognito_user_pool_domain.domain.id
 }
 
 output "user_pool_endpoint" {
