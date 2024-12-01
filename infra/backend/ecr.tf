@@ -37,7 +37,7 @@ locals {
 #The commands below are used to build and push a docker image of the application in the app folder
 locals {
   docker_login_command              = "aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com"
-  docker_build_command              = "docker build --build-arg REGION=${var.region}  --build-arg USER_POOL_ID=${module.cognito.user_pool_id} --build-arg CLIENT_ID=${module.cognito.user_pool_client_id} --build-arg FRONTEND_URL=${var.frontend_url} -t ${aws_ecr_repository.ecr.name} ../../backend/"
+  docker_build_command              = "docker build --build-arg REGION=${var.region}  --build-arg USER_POOL_ID=${module.cognito.user_pool_id} --build-arg CLIENT_ID=${module.cognito.user_pool_client_id} --build-arg FRONTEND_URL=https://${var.frontend_url} -t ${aws_ecr_repository.ecr.name} ../../backend/"
   docker_tag_command                = "docker tag ${aws_ecr_repository.ecr.name}:latest ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com/${aws_ecr_repository.ecr.name}:latest"
   docker_push_command               = "docker push ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com/${aws_ecr_repository.ecr.name}:latest"
 }
