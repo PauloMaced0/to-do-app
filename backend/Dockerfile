@@ -14,11 +14,13 @@ RUN pip install -r requirements.txt && \
 ARG REGION
 ARG USER_POOL_ID
 ARG CLIENT_ID
+ARG FRONTEND_URL
 
 # Set environment variables
 ENV REGION=${REGION}
 ENV USER_POOL_ID=${USER_POOL_ID}
 ENV CLIENT_ID=${CLIENT_ID}
+ENV FRONTEND_URL=${FRONTEND_URL}
 
 # Copy the FastAPI application code
 COPY . .

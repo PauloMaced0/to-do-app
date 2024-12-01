@@ -13,6 +13,11 @@ import jwt
 from jwt import PyJWKClient
  
 DATABASE_URL = str(os.getenv("DATABASE_URL", "sqlite:///todo.db"))
+SECRET_KEY = os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf')
+REGION = os.getenv('REGION', 'eu-west-1')
+USER_POOL_ID = os.getenv('USER_POOL_ID', 'eu-west-1_7GnxkjJTp')
+CLIENT_ID = os.getenv('CLIENT_ID', '2rboagge3tq8c6r3igp01ehtgd')
+FRONTEND_URL = os.getenv('FRONTEND_URL', "http://localhost:3000")
 
 engine = create_engine(DATABASE_URL)
 
@@ -24,7 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
-origins = ["http://localhost:3000"]
+origins = []
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,12 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Session middleware
-SECRET_KEY = os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf')
-REGION = os.getenv('REGION', 'eu-west-1')
-USER_POOL_ID = os.getenv('USER_POOL_ID', 'eu-west-1_7GnxkjJTp')
-CLIENT_ID = os.getenv('CLIENT_ID', '2rboagge3tq8c6r3igp01ehtgd')
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
