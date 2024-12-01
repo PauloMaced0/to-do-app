@@ -19,7 +19,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distrib" {
     default_cache_behavior {
 
 	target_origin_id = aws_s3_bucket.todoui.id 
-	allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+	allowed_methods  = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "DELETE"]
 	cached_methods   = ["GET", "HEAD", "OPTIONS"]
 
 	forwarded_values {
