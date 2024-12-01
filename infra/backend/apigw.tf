@@ -4,7 +4,7 @@ resource "aws_apigatewayv2_api" "apigw" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = [var.frontend_url]
+    allow_origins = ["https://${var.frontend_url}"]
     allow_methods = ["POST", "GET", "OPTIONS", "PUT", "DELETE"]
     allow_headers = ["Content-Type", "Authorization"]
     max_age = 300
