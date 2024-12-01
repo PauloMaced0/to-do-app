@@ -46,8 +46,23 @@ resource "aws_apigatewayv2_stage" "apigw_stage" {
   api_id = aws_apigatewayv2_api.apigw.id
   name   = "$default"
   auto_deploy = true
-}
 
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.apigw_logs.arn
+    format          = jsonencode({
+      requestId       = "$context.requestId",
+      ip              = "$context.identity.sourceIp",
+      caller          = "$context.identity.caller",
+      user            = "$context.identity.user",
+      requestTime     = "$context.requestTime",
+      httpMethod      = "$context.httpMethod",
+      resourcePath    = "$context.resourcePath",
+      status          = "$context.status",
+      protocol        = "$context.protocol",
+      responseLength  = "$context.responseLength"
+    })
+  }
+}
 # Integrate with cognito
 resource "aws_apigatewayv2_authorizer" "auth" {
   api_id           = aws_apigatewayv2_api.apigw.id
@@ -59,4 +74,9 @@ resource "aws_apigatewayv2_authorizer" "auth" {
     audience = [module.cognito.user_pool_client_id]
     issuer   = "https://${module.cognito.user_pool_endpoint}"
   }
+}
+
+resource "aws_cloudwatch_log_group" "apigw_logs" {
+  name = "/aws/apigateway/todo-apigw"
+  retention_in_days = 7
 }
