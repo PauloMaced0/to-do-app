@@ -5,7 +5,8 @@ resource "aws_apigatewayv2_api" "apigw" {
 
   cors_configuration {
     allow_origins = ["https://${var.frontend_url}"]
-    allow_methods = ["POST", 
+    allow_methods = [
+      "POST", 
       "GET", 
       "OPTIONS", 
       "PUT", 
