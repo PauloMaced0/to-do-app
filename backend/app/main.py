@@ -29,14 +29,33 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
-origins = [FRONTEND_URL]
+origins = [
+    FRONTEND_URL,
+]
+
+print(origins)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["POST", "GET", "OPTIONS", "PUT", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=
+    [
+        "POST", 
+        "GET", 
+        "OPTIONS", 
+        "PUT", 
+        "DELETE"
+    ],
+    allow_headers=
+    [
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "X-Requested-With",
+        "Origin",
+        "Cache-Control"
+    ],
 )
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
