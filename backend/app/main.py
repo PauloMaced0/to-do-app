@@ -17,7 +17,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf')
 REGION = os.getenv('REGION', 'eu-west-1')
 USER_POOL_ID = os.getenv('USER_POOL_ID', 'eu-west-1_7GnxkjJTp')
 CLIENT_ID = os.getenv('CLIENT_ID', '2rboagge3tq8c6r3igp01ehtgd')
-FRONTEND_URL = os.getenv('FRONTEND_URL', "http://localhost:3000")
+FRONTEND_URL = os.getenv('FRONTEND_URL', "https://d3agjxfsa7rhee.cloudfront.net")
 
 engine = create_engine(DATABASE_URL)
 
@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
-origins = []
+origins = [FRONTEND_URL]
 
 app.add_middleware(
     CORSMiddleware,
