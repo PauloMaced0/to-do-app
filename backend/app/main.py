@@ -1,3 +1,4 @@
+import logging
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware 
@@ -11,7 +12,10 @@ from .schemas import HealthCheck, TaskCreate, UserCreate, TaskUpdate, TaskStats,
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
- 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 DATABASE_URL = str(os.getenv("DATABASE_URL", "sqlite:///todo.db"))
 SECRET_KEY = os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf')
 REGION = os.getenv('REGION', 'eu-west-1')
@@ -29,11 +33,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
-origins = [
-    FRONTEND_URL,
-]
+# origins = [
+#     FRONTEND_URL,
+# ]
 
-print(origins)
+origins = ["https://d3agjxfsa7rhee.cloudfront.net"]
+
+logger.info(f"Allowed CORS origins: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
