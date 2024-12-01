@@ -21,6 +21,7 @@ resource "aws_apigatewayv2_api" "apigw" {
       "Cache-Control"
     ]
     max_age = 300
+    allow_credentials = true
   }
 }
 
