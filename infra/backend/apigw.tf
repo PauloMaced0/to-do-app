@@ -10,7 +10,7 @@ resource "aws_apigatewayv2_api" "apigw" {
       "GET", 
       "OPTIONS", 
       "PUT", 
-      "DELETE"
+      "DELETE",
     ]
     allow_headers = [
       "Content-Type",
@@ -18,7 +18,8 @@ resource "aws_apigatewayv2_api" "apigw" {
       "Accept",
       "X-Requested-With",
       "Origin",
-      "Cache-Control"
+      "Cache-Control",
+      "Access-Control-Request-Method",
     ]
     max_age = 300
     allow_credentials = true
