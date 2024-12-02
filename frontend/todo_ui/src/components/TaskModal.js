@@ -24,6 +24,7 @@ function TaskModal({ isOpen, onClose, onSubmit, task }) {
             </label>
             <div className="mt-2">
               <input
+                required
                 type="text"
                 name="title"
                 id="title"
