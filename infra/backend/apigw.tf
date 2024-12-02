@@ -27,7 +27,7 @@ resource "aws_apigatewayv2_api" "apigw" {
       "*",
     ]
     max_age = 300
-    allow_credentials = true
+    allow_credentials = false
   }
 }
 

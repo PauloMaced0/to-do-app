@@ -5,6 +5,7 @@
 #Creation of the ECR repo
 resource "aws_ecr_repository" "ecr" {
     name                            = "my-test-repo"
+    force_delete = true
 }
 
 #The ECR policy describes the management of images in the repo
