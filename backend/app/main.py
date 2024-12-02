@@ -62,6 +62,10 @@ app.add_middleware(
         # "Cache-Control"
         "*",
     ],
+    expose_headers=
+    [
+        "*",
+    ],
 )
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)

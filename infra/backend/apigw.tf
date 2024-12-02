@@ -23,6 +23,9 @@ resource "aws_apigatewayv2_api" "apigw" {
       # "Access-Control-Request-Method",
       "*",
     ]
+    expose_headers = [
+      "*",
+    ]
     max_age = 300
     allow_credentials = true
   }
