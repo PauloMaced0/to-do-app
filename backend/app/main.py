@@ -33,12 +33,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
-# origins = [
-#     FRONTEND_URL,
-# ]
-
 origins = [
-    "*",
+    FRONTEND_URL,
 ]
 
 logger.info(f"Allowed CORS origins: {origins}")
