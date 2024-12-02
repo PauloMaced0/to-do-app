@@ -6,20 +6,22 @@ resource "aws_apigatewayv2_api" "apigw" {
   cors_configuration {
     allow_origins = ["https://${var.frontend_url}"]
     allow_methods = [
-      "POST", 
-      "GET", 
-      "OPTIONS", 
-      "PUT", 
-      "DELETE",
+      # "POST", 
+      # "GET", 
+      # "OPTIONS", 
+      # "PUT", 
+      # "DELETE",
+      "*",
     ]
     allow_headers = [
-      "Content-Type",
-      "Authorization",
-      "Accept",
-      "X-Requested-With",
-      "Origin",
-      "Cache-Control",
-      "Access-Control-Request-Method",
+      # "Content-Type",
+      # "Authorization",
+      # "Accept",
+      # "X-Requested-With",
+      # "Origin",
+      # "Cache-Control",
+      # "Access-Control-Request-Method",
+      "*",
     ]
     max_age = 300
     allow_credentials = true
