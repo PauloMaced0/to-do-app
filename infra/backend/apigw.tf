@@ -61,6 +61,13 @@ resource "aws_apigatewayv2_route" "apigw_route" {
   authorizer_id = aws_apigatewayv2_authorizer.auth.id
 }
 
+resource "aws_apigatewayv2_route" "apigw_options_route" {
+  api_id    = aws_apigatewayv2_api.apigw.id
+  route_key = "OPTIONS /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.apigw_integration.id}"
+  authorization_type = "NONE"
+}
+
 # Set a default stage
 resource "aws_apigatewayv2_stage" "apigw_stage" {
   api_id = aws_apigatewayv2_api.apigw.id
