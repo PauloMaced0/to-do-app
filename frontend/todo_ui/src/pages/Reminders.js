@@ -5,7 +5,7 @@ import TaskModal from '../components/TaskModal';
 import FilterSortOptions from '../components/FilterSortOptions';
 import TaskList from '../components/TaskList';
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
-import { completeUserTask, createUserTask, deleteUserTask, getUserTasks, updateUserTask } from '../services/api';
+import { completeUserTask, createUserTask, deleteUserTask, getUserTasks, setUserAccount, updateUserTask } from '../services/api';
 
 function Reminders() {
   const [sortBy, setSortBy] = useState("Creation Date");
@@ -28,6 +28,12 @@ function Reminders() {
     try {
       const currentUser = await getCurrentUser();
       const session = await fetchAuthSession();
+
+      const userPayload = {
+        username: session.tokens.idToken.payload["email"],
+        sub: currentUser.userId,
+      };
+      await setUserAccount(session.tokens.idToken, userPayload);
 
       const response = await getUserTasks(currentUser.userId, filterBy, sortBy, session.tokens.idToken); 
 

@@ -9,21 +9,8 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-          // User is authenticated
-          await getUser();
-          navigate("/reminders");
-        }
-      } catch (err) {
-        console.error("Error fetching current user", err);
-      }
-    };
-
-    checkUser();
-  }, [navigate]);
+    getUser();
+  }, []);
 
   const getUser = async () => {
     try {
@@ -54,8 +41,7 @@ function Home() {
     }
 
     try {
-      signInWithRedirect({}); // Trigger Hosted UI login
-      getUser();
+      await signInWithRedirect({}); // Trigger Hosted UI login
     } catch (err) {
       console.error("Error during sign-in", err);
     }
