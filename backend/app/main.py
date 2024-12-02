@@ -17,11 +17,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 DATABASE_URL = str(os.getenv("DATABASE_URL", "sqlite:///todo.db"))
-SECRET_KEY = os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf')
-REGION = os.getenv('REGION', 'eu-west-1')
-USER_POOL_ID = os.getenv('USER_POOL_ID', 'eu-west-1_7GnxkjJTp')
-CLIENT_ID = os.getenv('CLIENT_ID', '2rboagge3tq8c6r3igp01ehtgd')
-FRONTEND_URL = os.getenv('FRONTEND_URL', "https://d3agjxfsa7rhee.cloudfront.net")
+SECRET_KEY = str(os.getenv('SECRET_KEY', 'K%!MaoL26XQe8iGAAyDrmbkw&bqE$hCPw4hSk!Hf'))
+REGION = str(os.getenv('REGION'))
+USER_POOL_ID = str(os.getenv('USER_POOL_ID'))
+CLIENT_ID = str(os.getenv('CLIENT_ID'))
+FRONTEND_URL = str(os.getenv('FRONTEND_URL'))
 
 engine = create_engine(DATABASE_URL)
 
@@ -33,8 +33,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": True}, lifespan=lifespan)
 
+# origins = [
+#     FRONTEND_URL,
+# ]
+
 origins = [
-    FRONTEND_URL,
+    "*",
 ]
 
 logger.info(f"Allowed CORS origins: {origins}")
@@ -45,20 +49,22 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=
     [
-        "POST", 
-        "GET", 
-        "OPTIONS", 
-        "PUT", 
-        "DELETE"
+        # "POST", 
+        # "GET", 
+        # "OPTIONS", 
+        # "PUT", 
+        # "DELETE"
+        "*",
     ],
     allow_headers=
     [
-        "Content-Type",
-        "Authorization",
-        "Accept",
-        "X-Requested-With",
-        "Origin",
-        "Cache-Control"
+        # "Content-Type",
+        # "Authorization",
+        # "Accept",
+        # "X-Requested-With",
+        # "Origin",
+        # "Cache-Control"
+        "*",
     ],
 )
 
