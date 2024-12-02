@@ -23,7 +23,7 @@ function Home() {
     };
 
     checkUser();
-  }, []);
+  }, [navigate]);
 
   const getUser = async () => {
     try {
