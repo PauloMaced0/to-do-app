@@ -6,7 +6,7 @@ The implementation of Continuous Integration and Continuous Deployment (CI/CD) p
 
 ## Demo 
 
-[▶️ Watch Demo](assets/demo.mov)
+![](assets/demo.gif)
 
 ---
 
